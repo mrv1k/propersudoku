@@ -1,5 +1,7 @@
 <script>
-  let board = [
+  const X = '.';
+
+  let board = $state([
     ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
     ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
     ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
@@ -9,28 +11,41 @@
     ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
     ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
     ['.', '.', '.', '.', '8', '.', '.', '7', '9']
-  ];
+  ]);
 
   const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
-  let isKeysHidden = $state(true);
+
+  let activeRow = $state(-1);
+  let activeCol = $state(-1);
+
+  const compareCell = (row, col) => activeRow === row && activeCol === col;
+  let isAnyCellActive = $derived(compareCell(-1, -1));
 </script>
 
-<h1>Welcome to Sudoku (proper)</h1>
+<h1>Welcome to Sudoku</h1>
 
-<div>
+<div id="game-wrapper" style="text-align: center;">
   <div>
     {#each board as rows, rowIndex}
-      {#each rows as cell, cellIndex}
+      {#each rows as cell, colIndex}
         <button
+          class="square-2rem"
+          class:selectable={cell !== X}
+          class:selected={compareCell(rowIndex, colIndex)}
           onclick={() => {
-            console.log({ rowIndex, cellIndex });
-            if (cell !== '.') {
+            console.log({ row: rowIndex, col: colIndex });
+            if (cell !== X) {
               return;
             }
-            console.log(cell);
-            isKeysHidden = false;
 
-            // display number menu
+            const currentCellIsActive = compareCell(rowIndex, colIndex);
+            if (!currentCellIsActive) {
+              activeCol = colIndex;
+              activeRow = rowIndex;
+            } else {
+              activeCol = -1;
+              activeRow = -1;
+            }
           }}>{cell}</button
         >
       {/each}
@@ -40,9 +55,9 @@
   <br />
   <br />
 
-  <div id="keys" class:visually-hidden={isKeysHidden}>
+  <div id="keys" class:visually-hidden={isAnyCellActive}>
     {#each keys as key}
-      <button onclick={() => console.log(key)}>
+      <button class="square-2rem" onclick={() => console.log(key)}>
         {key}
       </button>
     {/each}
@@ -66,6 +81,18 @@
     /*font-family: var(--font-body);*/
     font-family: var(--font-mono);
     color: var(--color-text);
+  }
+
+  .square-2rem {
+    height: 2rem;
+    width: 2rem;
+    margin: 1px;
+  }
+
+  .selected {
+    /*outline: 3px inset green;*/
+    border-radius: 3px;
+    border: 3px solid green;
   }
 
   body {
