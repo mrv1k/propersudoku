@@ -1,16 +1,16 @@
 <script>
-  const X = '.';
+  const X = '-';
 
   let board = $state([
-    ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
-    ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
-    ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
-    ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
-    ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
-    ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
-    ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
-    ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
-    ['.', '.', '.', '.', '8', '.', '.', '7', '9']
+    ['5', '3', X, X, '7', X, X, X, X],
+    ['6', X, X, '1', '9', '5', X, X, X],
+    [X, '9', '8', X, X, X, X, '6', X],
+    ['8', X, X, X, '6', X, X, X, '3'],
+    ['4', X, X, '8', X, '3', X, X, '1'],
+    ['7', X, X, X, '2', X, X, X, '6'],
+    [X, '6', X, X, X, X, '2', '8', X],
+    [X, X, X, '4', '1', '9', X, X, '5'],
+    [X, X, X, X, '8', X, X, '7', '9']
   ]);
 
   const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
@@ -30,7 +30,7 @@
       {#each rows as cell, colIndex}
         <button
           class="square-2rem"
-          class:selectable={cell !== X}
+          class:selectable={cell === X}
           class:selected={compareCell(rowIndex, colIndex)}
           onclick={() => {
             console.log({ row: rowIndex, col: colIndex });
@@ -40,11 +40,11 @@
 
             const currentCellIsActive = compareCell(rowIndex, colIndex);
             if (!currentCellIsActive) {
-              activeCol = colIndex;
               activeRow = rowIndex;
+              activeCol = colIndex;
             } else {
-              activeCol = -1;
               activeRow = -1;
+              activeCol = -1;
             }
           }}>{cell}</button
         >
@@ -57,7 +57,14 @@
 
   <div id="keys" class:visually-hidden={isAnyCellActive}>
     {#each keys as key}
-      <button class="square-2rem" onclick={() => console.log(key)}>
+      <button
+        class="square-2rem"
+        onclick={() => {
+          board[activeRow][activeCol] = String(key);
+          activeRow = -1;
+          activeCol = -1;
+        }}
+      >
         {key}
       </button>
     {/each}
@@ -87,12 +94,14 @@
     height: 2rem;
     width: 2rem;
     margin: 1px;
-  }
-
-  .selected {
-    /*outline: 3px inset green;*/
-    border-radius: 3px;
-    border: 3px solid green;
+    &.selectable {
+      cursor: pointer;
+    }
+    &.selected {
+      /*outline: 3px inset green;*/
+      border-radius: 3px;
+      border: 3px solid green;
+    }
   }
 
   body {
