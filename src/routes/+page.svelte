@@ -22,34 +22,37 @@
   let isAnyCellActive = $derived(compareCell(-1, -1));
 </script>
 
-<h1>Welcome to Sudoku</h1>
+<div id="wrapper" style="text-align: center;">
+  <h1>Welcome to Sudoku</h1>
 
-<div id="game-wrapper" style="text-align: center;">
-  <div>
+  <div class="game-wrapper">
     {#each board as rows, rowIndex}
-      {#each rows as cell, colIndex}
-        <button
-          class="square-2rem"
-          class:selectable={cell === X}
-          class:selected={compareCell(rowIndex, colIndex)}
-          onclick={() => {
-            console.log({ row: rowIndex, col: colIndex });
-            if (cell !== X) {
-              return;
-            }
+      <div class="game-row">
+        {#each rows as cell, colIndex}
+          <span class="game-cell">
+            <button
+              class="square-2rem"
+              class:selectable={cell === X}
+              class:selected={compareCell(rowIndex, colIndex)}
+              onclick={() => {
+                console.log({ row: rowIndex, col: colIndex });
+                if (cell !== X) {
+                  return;
+                }
 
-            const currentCellIsActive = compareCell(rowIndex, colIndex);
-            if (!currentCellIsActive) {
-              activeRow = rowIndex;
-              activeCol = colIndex;
-            } else {
-              activeRow = -1;
-              activeCol = -1;
-            }
-          }}>{cell}</button
-        >
-      {/each}
-      <br />
+                const currentCellIsActive = compareCell(rowIndex, colIndex);
+                if (!currentCellIsActive) {
+                  activeRow = rowIndex;
+                  activeCol = colIndex;
+                } else {
+                  activeRow = -1;
+                  activeCol = -1;
+                }
+              }}>{cell}</button
+            >
+          </span>
+        {/each}
+      </div>
     {/each}
   </div>
   <br />
@@ -88,6 +91,26 @@
     /*font-family: var(--font-body);*/
     font-family: var(--font-mono);
     color: var(--color-text);
+  }
+
+  .game-wrapper {
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .game-row:nth-child(3n) {
+    border-bottom: 2px dashed black;
+  }
+  .game-row:last-child {
+    border-bottom: none;
+  }
+
+  .game-cell:nth-child(3n) {
+    border-right: 2px dashed black;
+  }
+
+  .game-cell:last-child {
+    border-right: none;
   }
 
   .square-2rem {
