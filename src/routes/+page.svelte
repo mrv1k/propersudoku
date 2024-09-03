@@ -17,12 +17,31 @@
 
   let activeRow = $state(-1);
   let activeCol = $state(-1);
-
   const compareCell = (row, col) => activeRow === row && activeCol === col;
   let isAnyCellActive = $derived(compareCell(-1, -1));
+
+  const checkRow = (key) =>
+    !board[activeRow]
+      .filter((n) => n !== X)
+      .map((n) => Number(n))
+      .includes(key);
+
+  const checkCol = (key) =>
+    !board
+      .map((row) => row[activeCol])
+      .filter((n) => n !== X)
+      .map((n) => Number(n))
+      .includes(key);
+
+  const check3x3 = (key) => {
+    const x = activeRow + activeCol;
+    //console.log(x, x / 3, Math.ceil(x / 3));
+
+    return true;
+  };
 </script>
 
-<div id="wrapper" style="text-align: center;">
+<div id="wrapper">
   <h1>Welcome to Sudoku</h1>
 
   <div class="game-wrapper">
@@ -58,14 +77,25 @@
   <br />
   <br />
 
-  <div id="keys" class:visually-hidden={isAnyCellActive}>
+  <div id="keys" style="text-align: center;" class:visually-hidden={isAnyCellActive}>
     {#each keys as key}
       <button
         class="square-2rem"
         onclick={() => {
-          board[activeRow][activeCol] = String(key);
-          activeRow = -1;
-          activeCol = -1;
+          const isValidRow = checkRow(key);
+          const isValidCol = checkCol(key);
+          const isValid3x3 = check3x3(key);
+          console.log({ isValidRow, isValidCol, isValid3x3 });
+          if (isValidRow && isValidCol && isValid3x3) {
+            board[activeRow][activeCol] = String(key);
+            activeRow = -1;
+            activeCol = -1;
+            return;
+          }
+
+          // input is invalid
+          //console.log('are you sure? 🤨');
+          return;
         }}
       >
         {key}
@@ -121,9 +151,9 @@
       cursor: pointer;
     }
     &.selected {
-      /*outline: 3px inset green;*/
       border-radius: 3px;
-      border: 3px solid green;
+      background-color: lightgreen;
+      border: 1px solid green;
     }
   }
 
