@@ -20,24 +20,43 @@
   const compareCell = (row, col) => activeRow === row && activeCol === col;
   let isAnyCellActive = $derived(compareCell(-1, -1));
 
-  const checkRow = (key) =>
-    !board[activeRow]
+  const check = (arr, n) =>
+    !arr
       .filter((n) => n !== X)
       .map((n) => Number(n))
-      .includes(key);
+      .includes(n);
+
+  const checkRow = (key) => check(board[activeRow], key);
 
   const checkCol = (key) =>
-    !board
-      .map((row) => row[activeCol])
-      .filter((n) => n !== X)
-      .map((n) => Number(n))
-      .includes(key);
+    check(
+      board.map((row) => row[activeCol]),
+      key
+    );
 
   const check3x3 = (key) => {
-    const x = activeRow + activeCol;
-    //console.log(x, x / 3, Math.ceil(x / 3));
+    let rows = [];
 
-    return true;
+    if (activeRow < 3) {
+      rows = board.slice(0, 3);
+    } else if (activeRow < 6) {
+      rows = board.slice(3, 6);
+    } else {
+      rows = board.slice(6);
+    }
+
+    if (activeCol < 3) {
+      rows = rows.map((row) => row.slice(0, 3));
+    } else if (activeCol < 6) {
+      rows = rows.map((row) => row.slice(3, 6));
+    } else {
+      rows = rows.map((row) => row.slice(6));
+    }
+
+    return check(
+      rows.flatMap((row) => row),
+      key
+    );
   };
 </script>
 
@@ -54,7 +73,6 @@
               class:selectable={cell === X}
               class:selected={compareCell(rowIndex, colIndex)}
               onclick={() => {
-                console.log({ row: rowIndex, col: colIndex });
                 if (cell !== X) {
                   return;
                 }
@@ -94,7 +112,7 @@
           }
 
           // input is invalid
-          //console.log('are you sure? 🤨');
+          console.log('are you sure? 🤨');
           return;
         }}
       >
