@@ -17,9 +17,9 @@
   let activeCol = $state(-1);
 
   const compareCell = (row, col) => activeRow === row && activeCol === col;
-  let isAnyCellActive = $derived(compareCell(-1, -1));
+  let isAnyCellActive = $derived(!compareCell(-1, -1));
 
-  const getNumbers = (arr) => arr.filter((n) => n !== X).map((n) => Number(n));
+  const getNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
   const getRowNumbers = () => getNumbers(board[activeRow]);
   const getColNumbers = () => getNumbers(board.map((row) => row[activeCol]));
 
@@ -53,13 +53,18 @@
     return check(square, key);
   };
 
+  const setStub = new Set();
   const findAlreadyUsedNumbers = () => {
+    if (!isAnyCellActive) {
+      return setStub;
+    }
+
     const row = getRowNumbers();
     const col = getColNumbers();
     const square = get3x3Numbers();
-    const numbersAlreadyUsed = Array.from(new Set([...row, ...col, ...square])).toSorted();
-    return numbersAlreadyUsed;
+    return new Set([...row, ...col, ...square].sort());
   };
+  let invalidKeys = $derived(findAlreadyUsedNumbers());
 </script>
 
 <div id="wrapper">
@@ -83,9 +88,6 @@
                 if (!currentCellIsActive) {
                   activeRow = rowIndex;
                   activeCol = colIndex;
-
-                  const validNumbers = findAlreadyUsedNumbers();
-                  console.log(validNumbers);
                 } else {
                   activeRow = -1;
                   activeCol = -1;
@@ -100,22 +102,21 @@
   <br />
   <br />
 
-  <div id="keys" style="text-align: center;" class:visually-hidden={isAnyCellActive}>
+  <div id="keys" style="text-align: center;" class:visually-hidden={!isAnyCellActive}>
     {#each keys as key}
       <button
         class="square-2rem"
+        disabled={invalidKeys.has(key)}
         onclick={() => {
           const isValidRow = checkRow(key);
           const isValidCol = checkCol(key);
           const isValid3x3 = check3x3(key);
-          console.log({ isValidRow, isValidCol, isValid3x3 });
           if (isValidRow && isValidCol && isValid3x3) {
             board[activeRow][activeCol] = String(key);
             activeRow = -1;
             activeCol = -1;
             return;
           }
-          return;
         }}
       >
         {key}
@@ -174,6 +175,9 @@
       border-radius: 3px;
       background-color: lightgreen;
       border: 1px solid green;
+    }
+    &:disabled {
+      cursor: not-allowed;
     }
   }
 
