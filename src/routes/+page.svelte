@@ -1,5 +1,6 @@
 <script>
   const X = '-';
+  const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
 
   let board = $state([
     ['5', '3', X, X, '7', X, X, X, X],
@@ -12,51 +13,52 @@
     [X, X, X, '4', '1', '9', X, X, '5'],
     [X, X, X, X, '8', X, X, '7', '9']
   ]);
-
-  const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
-
   let activeRow = $state(-1);
   let activeCol = $state(-1);
+
   const compareCell = (row, col) => activeRow === row && activeCol === col;
   let isAnyCellActive = $derived(compareCell(-1, -1));
 
-  const check = (arr, n) =>
-    !arr
-      .filter((n) => n !== X)
-      .map((n) => Number(n))
-      .includes(n);
+  const getNumbers = (arr) => arr.filter((n) => n !== X).map((n) => Number(n));
+  const getRowNumbers = () => getNumbers(board[activeRow]);
+  const getColNumbers = () => getNumbers(board.map((row) => row[activeCol]));
 
-  const checkRow = (key) => check(board[activeRow], key);
+  const check = (arr, n) => !arr.includes(n);
+  const checkRow = (key) => check(getRowNumbers(), key);
+  const checkCol = (key) => check(getColNumbers(), key);
 
-  const checkCol = (key) =>
-    check(
-      board.map((row) => row[activeCol]),
-      key
-    );
-
-  const check3x3 = (key) => {
-    let rows = [];
+  const get3x3Numbers = () => {
+    let square = [];
 
     if (activeRow < 3) {
-      rows = board.slice(0, 3);
+      square = board.slice(0, 3);
     } else if (activeRow < 6) {
-      rows = board.slice(3, 6);
+      square = board.slice(3, 6);
     } else {
-      rows = board.slice(6);
+      square = board.slice(6);
     }
 
     if (activeCol < 3) {
-      rows = rows.map((row) => row.slice(0, 3));
+      square = square.map((row) => row.slice(0, 3));
     } else if (activeCol < 6) {
-      rows = rows.map((row) => row.slice(3, 6));
+      square = square.map((row) => row.slice(3, 6));
     } else {
-      rows = rows.map((row) => row.slice(6));
+      square = square.map((row) => row.slice(6));
     }
+    return getNumbers(square.flatMap((row) => row));
+  };
 
-    return check(
-      rows.flatMap((row) => row),
-      key
-    );
+  const check3x3 = (key) => {
+    const square = get3x3Numbers();
+    return check(square, key);
+  };
+
+  const findAlreadyUsedNumbers = () => {
+    const row = getRowNumbers();
+    const col = getColNumbers();
+    const square = get3x3Numbers();
+    const numbersAlreadyUsed = Array.from(new Set([...row, ...col, ...square])).toSorted();
+    return numbersAlreadyUsed;
   };
 </script>
 
@@ -81,6 +83,9 @@
                 if (!currentCellIsActive) {
                   activeRow = rowIndex;
                   activeCol = colIndex;
+
+                  const validNumbers = findAlreadyUsedNumbers();
+                  console.log(validNumbers);
                 } else {
                   activeRow = -1;
                   activeCol = -1;
@@ -110,9 +115,6 @@
             activeCol = -1;
             return;
           }
-
-          // input is invalid
-          console.log('are you sure? 🤨');
           return;
         }}
       >
