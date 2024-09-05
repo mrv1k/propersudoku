@@ -74,9 +74,9 @@
     {#each board as rows, rowIndex}
       <div class="game-row">
         {#each rows as cell, colIndex}
-          <span class="game-cell">
+          <span class="game-cell-span">
             <button
-              class="square-2rem"
+              class="game-button"
               class:selectable={cell === X}
               class:selected={compareCell(rowIndex, colIndex)}
               onclick={() => {
@@ -105,7 +105,7 @@
   <div id="keys" style="text-align: center;" class:visually-hidden={!isAnyCellActive}>
     {#each keys as key}
       <button
-        class="square-2rem"
+        class="game-key"
         disabled={invalidKeys.has(key)}
         onclick={() => {
           const isValidRow = checkRow(key);
@@ -149,24 +149,32 @@
     margin: 0 auto;
   }
 
-  .game-row:nth-child(3n) {
-    border-bottom: 2px dashed black;
-  }
-  .game-row:last-child {
-    border-bottom: none;
-  }
-
-  .game-cell:nth-child(3n) {
-    border-right: 2px dashed black;
-  }
-
-  .game-cell:last-child {
-    border-right: none;
+  .game-row {
+    /*height: 2.2rem;*/
+    &:nth-child(3n) {
+      border-bottom: 2px dashed black;
+    }
+    &:last-child {
+      border-bottom: none;
+    }
   }
 
-  .square-2rem {
+  .game-cell-span {
+    &:nth-child(3n) {
+      border-right: 2px dashed black;
+    }
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .game-button,
+  .game-key {
     height: 2rem;
     width: 2rem;
+
+    /*border-radius: 2px;*/
+    /*height: 90%;*/
     margin: 1px;
     &.selectable {
       cursor: pointer;
@@ -221,17 +229,6 @@
 
   h2 {
     font-size: 1rem;
-  }
-
-  pre {
-    font-size: 16px;
-    font-family: var(--font-mono);
-    background-color: rgba(255, 255, 255, 0.45);
-    border-radius: 3px;
-    box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
-    padding: 0.5em;
-    overflow-x: auto;
-    color: var(--color-text);
   }
 
   .text-column {
