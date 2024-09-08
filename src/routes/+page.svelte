@@ -65,6 +65,18 @@
     return new Set([...row, ...col, ...square].sort());
   };
   let invalidKeys = $derived(findAlreadyUsedNumbers());
+
+  const handleNumberInput = (key) => {
+    const isValidRow = checkRow(key);
+    const isValidCol = checkCol(key);
+    const isValid3x3 = check3x3(key);
+    if (isValidRow && isValidCol && isValid3x3) {
+      board[activeRow][activeCol] = String(key);
+      activeRow = -1;
+      activeCol = -1;
+      return;
+    }
+  };
 </script>
 
 <div class="container">
@@ -77,8 +89,9 @@
           <span class="game-cell-span">
             <button
               class="game-cell"
-              class:selectable={cell === X}
-              class:selected={compareCell(rowIndex, colIndex)}
+              class:unselectable={cell !== X}
+              class:no-animation={cell !== X}
+              class:btn-info={compareCell(rowIndex, colIndex)}
               onclick={() => {
                 if (cell !== X) {
                   return;
@@ -105,17 +118,7 @@
       <button
         class="game-key"
         disabled={invalidKeys.has(key)}
-        onclick={() => {
-          const isValidRow = checkRow(key);
-          const isValidCol = checkCol(key);
-          const isValid3x3 = check3x3(key);
-          if (isValidRow && isValidCol && isValid3x3) {
-            board[activeRow][activeCol] = String(key);
-            activeRow = -1;
-            activeCol = -1;
-            return;
-          }
-        }}
+        onclick={() => handleNumberInput(key)}
       >
         {key}
       </button>
@@ -125,7 +128,6 @@
 
 <svelte:window
   onkeydown={(e) => {
-    console.log(e.key);
     if (isAnyCellActive) {
       switch (e.key) {
         case '1':
@@ -137,10 +139,14 @@
         case '7':
         case '8':
         case '9':
-          console.log('yay');
+          handleNumberInput(e.key);
           break;
         case 'Backspace':
+          // TODO: allow number removal without backspace on mobile
+          handleNumberInput(X);
+          break;
         default:
+          break;
       }
     }
   }}
@@ -155,6 +161,9 @@
   .game-cell,
   .game-key {
     @apply text-lg btn btn-square btn-outline;
+    &.unselectable {
+      cursor: not-allowed;
+    }
   }
 
   .game-row {
