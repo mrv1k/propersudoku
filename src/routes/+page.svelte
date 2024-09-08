@@ -68,7 +68,7 @@
 </script>
 
 <div class="container">
-  <h1 class="text-xl mx-auto text-center mb-16">Welcome to Sudoku</h1>
+  <h1 class="text-2xl mx-auto text-center mb-16 mt-2">Welcome to Sudoku</h1>
 
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
@@ -76,7 +76,7 @@
         {#each rows as cell, colIndex}
           <span class="game-cell-span">
             <button
-              class="game-cell btn btn-square btn-outline"
+              class="game-cell"
               class:selectable={cell === X}
               class:selected={compareCell(rowIndex, colIndex)}
               onclick={() => {
@@ -99,10 +99,11 @@
       </div>
     {/each}
   </div>
-  <div class="game-keyboard mt-16 space-x-1" style="text-align: center;" class:hidden={false}>
+
+  <div class="game-keyboard mt-16 space-x-1 text-center" class:hidden={!isAnyCellActive}>
     {#each keys as key}
       <button
-        class="game-key btn btn-square"
+        class="game-key"
         disabled={invalidKeys.has(key)}
         onclick={() => {
           const isValidRow = checkRow(key);
@@ -122,11 +123,38 @@
   </div>
 </div>
 
+<svelte:window
+  onkeydown={(e) => {
+    console.log(e.key);
+    if (isAnyCellActive) {
+      switch (e.key) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          console.log('yay');
+          break;
+        case 'Backspace':
+        default:
+      }
+    }
+  }}
+/>
+
 <style>
   :root {
     --font-mono: monospace;
     font-family: var(--font-mono);
-    color: var(--color-text);
+  }
+
+  .game-cell,
+  .game-key {
+    @apply text-lg btn btn-square btn-outline;
   }
 
   .game-row {
