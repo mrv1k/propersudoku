@@ -6,6 +6,7 @@
   const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
   let board = $state(emptyBoard);
+  let isBoardInitiated = $state(false);
 
   // TODO: read & write state to url
   // TODO: make sure this happens once (even in dev)
@@ -25,11 +26,15 @@
   });
 
   $effect(() => {
-    console.count('once');
+    if (isBoardInitiated) {
+      return;
+    }
+
     try {
       const parsed = JSON.parse(initialBoardJSON);
       if (typeof parsed === 'object' && Array.isArray(parsed.board)) {
         board = parsed.board;
+        isBoardInitiated = true;
       }
     } catch {
       console.error('oh no json parse derped');
@@ -103,7 +108,7 @@
 </script>
 
 <div class="container">
-  <h1 class="text-2xl mx-auto text-center mb-16 mt-2">Welcome to Sudoku</h1>
+  <div class="mb-16 mt-2"></div>
 
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
