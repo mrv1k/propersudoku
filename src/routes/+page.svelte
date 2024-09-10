@@ -108,8 +108,6 @@
 </script>
 
 <div class="container">
-  <div class="mb-16 mt-2"></div>
-
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
       <div class="game-row">
