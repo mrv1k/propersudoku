@@ -6,7 +6,7 @@
   //const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
   // TODO: read & write state to url
-  const initialBoardURLParsed = [
+  const initialBoard = [
     ['5', '3', X, X, '7', X, X, X, X],
     ['6', X, X, '1', '9', '5', X, X, X],
     [X, '9', '8', X, X, X, X, '6', X],
@@ -17,10 +17,11 @@
     [X, X, X, '4', '1', '9', X, X, '5'],
     [X, X, X, X, '8', X, X, '7', '9']
   ];
-  const initialBoardURLState = initialBoardURLParsed.map((row) => row.join('')).join(',');
+  //const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
 
-  let board = $state(initialBoardURLParsed);
-  let boardURLStateLive = $derived(board.map((row) => row.join('')).join(','));
+  let board = $state(initialBoard);
+  //let boardURL = $derived(board.map((row) => row.join('')).join(','));
+
   //let isBoardInitiated = $state(false);
   //$effect(() => {
   //  if (isBoardInitiated) {
@@ -33,6 +34,8 @@
 
   const compareCell = (row, col) => activeRow === row && activeCol === col;
   let isAnyCellActive = $derived(!compareCell(-1, -1));
+
+  let checkIsCellUserInput = (row, col) => initialBoard[row][col] !== board[row][col];
 
   const getNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
   const getRowNumbers = () => getNumbers(board[activeRow]);
@@ -121,11 +124,6 @@
 />
 
 <div class="container mx-auto">
-  <div>
-    {encodeURI(initialBoardURLState)}
-    {encodeURI(boardURLStateLive)}
-  </div>
-
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
       <div class="game-row">
@@ -134,13 +132,16 @@
             <button
               class="game-cell"
               class:css-disabled={cell !== X}
-              class:selected={compareCell(rowIndex, colIndex)}
+              class:btn-pressable={cell === X}
+              class:btn-active={compareCell(rowIndex, colIndex)}
+              class:btn-user-input={checkIsCellUserInput(rowIndex, colIndex)}
               onclick={() => {
                 if (cell !== X) {
                   return;
                 }
 
                 const currentCellIsActive = compareCell(rowIndex, colIndex);
+                console.log(currentCellIsActive);
                 if (!currentCellIsActive) {
                   activeRow = rowIndex;
                   activeCol = colIndex;
@@ -156,10 +157,11 @@
     {/each}
   </div>
 
-  <div class="game-keyboard mt-16 space-x-1 text-center" class:hidden={!isAnyCellActive}>
+  <div class="game-keyboard mt-12 space-x-1 text-center" class:hidden={!isAnyCellActive}>
     {#each keys as key}
       <button
         class="game-key"
+        class:btn-pressable={!invalidKeys.has(key)}
         disabled={invalidKeys.has(key)}
         onclick={() => handleNumberInput(key)}
       >
@@ -178,16 +180,16 @@
   .game-cell,
   .game-key {
     @apply text-lg btn btn-square;
-    &.selected {
-      @apply btn-info;
-    }
     /* just like me c: */
     &.css-disabled {
       @apply cursor-not-allowed no-animation;
     }
-    &:not(.css-disabled) {
+    &.btn-pressable {
       @apply btn-outline;
     }
+  }
+  .btn-user-input {
+    @apply btn-primary;
   }
 
   .game-row {

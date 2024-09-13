@@ -3,14 +3,14 @@
 
   let { children } = $props();
 
-  let isSettingsVisible = $state(true);
+  let isSettingsVisible = $state(false);
   const toggleSettings = () => (isSettingsVisible = !isSettingsVisible);
 </script>
 
 <div class="layout-wrapper">
   <div class="navbar bg-base-100">
     <div class="flex-1">
-      <btn class="btn btn-ghost text-xl no-animation">sudoku</btn>
+      <btn class="btn btn-ghost text-lg no-animation">sudoku</btn>
     </div>
     <div class="flex-none">
       <button class="btn btn-square btn-ghost" onclick={toggleSettings}>
