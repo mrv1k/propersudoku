@@ -1,6 +1,8 @@
 <script>
   import '../app.css';
 
+  let { children } = $props();
+
   let isSettingsVisible = $state(true);
   const toggleSettings = () => (isSettingsVisible = !isSettingsVisible);
 </script>
@@ -64,4 +66,4 @@
   {/if}
 </div>
 
-<slot />
+{@render children()}

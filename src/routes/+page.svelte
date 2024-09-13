@@ -107,7 +107,33 @@
   };
 </script>
 
-<div class="container">
+<svelte:window
+  onkeydown={(e) => {
+    if (isAnyCellActive) {
+      switch (e.key) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          handleNumberInput(e.key);
+          break;
+        case 'Backspace':
+          // TODO: allow number removal without backspace on mobile
+          handleNumberInput(X);
+          break;
+        default:
+          break;
+      }
+    }
+  }}
+/>
+
+<div class="container mx-auto">
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
       <div class="game-row">
@@ -115,9 +141,8 @@
           <span class="game-cell-span">
             <button
               class="game-cell"
-              class:unselectable={cell !== X}
-              class:no-animation={cell !== X}
-              class:btn-info={compareCell(rowIndex, colIndex)}
+              class:css-disabled={cell !== X}
+              class:selected={compareCell(rowIndex, colIndex)}
               onclick={() => {
                 if (cell !== X) {
                   return;
@@ -152,32 +177,6 @@
   </div>
 </div>
 
-<svelte:window
-  onkeydown={(e) => {
-    if (isAnyCellActive) {
-      switch (e.key) {
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-          handleNumberInput(e.key);
-          break;
-        case 'Backspace':
-          // TODO: allow number removal without backspace on mobile
-          handleNumberInput(X);
-          break;
-        default:
-          break;
-      }
-    }
-  }}
-/>
-
 <style>
   :root {
     --font-mono: monospace;
@@ -186,9 +185,16 @@
 
   .game-cell,
   .game-key {
-    @apply text-lg btn btn-square btn-outline;
-    &.unselectable {
-      cursor: not-allowed;
+    @apply text-lg btn btn-square;
+    &.selected {
+      @apply btn-info;
+    }
+    /* just like me c: */
+    &.css-disabled {
+      @apply cursor-not-allowed no-animation;
+    }
+    &:not(.css-disabled) {
+      @apply btn-outline;
     }
   }
 
