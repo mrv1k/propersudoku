@@ -2,44 +2,31 @@
   const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
 
   const X = '-';
-  const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
-  const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
-
-  let board = $state(emptyBoard);
-  let isBoardInitiated = $state(false);
+  //const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
+  //const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
   // TODO: read & write state to url
-  // TODO: make sure this happens once (even in dev)
-  // simmulate URL state
-  const initialBoardJSON = JSON.stringify({
-    board: [
-      ['5', '3', X, X, '7', X, X, X, X],
-      ['6', X, X, '1', '9', '5', X, X, X],
-      [X, '9', '8', X, X, X, X, '6', X],
-      ['8', X, X, X, '6', X, X, X, '3'],
-      ['4', X, X, '8', X, '3', X, X, '1'],
-      ['7', X, X, X, '2', X, X, X, '6'],
-      [X, '6', X, X, X, X, '2', '8', X],
-      [X, X, X, '4', '1', '9', X, X, '5'],
-      [X, X, X, X, '8', X, X, '7', '9']
-    ]
-  });
+  const initialBoardURLParsed = [
+    ['5', '3', X, X, '7', X, X, X, X],
+    ['6', X, X, '1', '9', '5', X, X, X],
+    [X, '9', '8', X, X, X, X, '6', X],
+    ['8', X, X, X, '6', X, X, X, '3'],
+    ['4', X, X, '8', X, '3', X, X, '1'],
+    ['7', X, X, X, '2', X, X, X, '6'],
+    [X, '6', X, X, X, X, '2', '8', X],
+    [X, X, X, '4', '1', '9', X, X, '5'],
+    [X, X, X, X, '8', X, X, '7', '9']
+  ];
+  const initialBoardURLState = initialBoardURLParsed.map((row) => row.join('')).join(',');
 
-  $effect(() => {
-    if (isBoardInitiated) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(initialBoardJSON);
-      if (typeof parsed === 'object' && Array.isArray(parsed.board)) {
-        board = parsed.board;
-        isBoardInitiated = true;
-      }
-    } catch {
-      console.error('oh no json parse derped');
-    }
-  });
+  let board = $state(initialBoardURLParsed);
+  let boardURLStateLive = $derived(board.map((row) => row.join('')).join(','));
+  //let isBoardInitiated = $state(false);
+  //$effect(() => {
+  //  if (isBoardInitiated) {
+  //    return;
+  //  }
+  //});
 
   let activeRow = $state(-1);
   let activeCol = $state(-1);
@@ -134,6 +121,11 @@
 />
 
 <div class="container mx-auto">
+  <div>
+    {encodeURI(initialBoardURLState)}
+    {encodeURI(boardURLStateLive)}
+  </div>
+
   <div class="game-wrapper w-fit mx-auto">
     {#each board as rows, rowIndex}
       <div class="game-row">
