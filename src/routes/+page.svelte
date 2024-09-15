@@ -2,7 +2,6 @@
   const X = '-';
 
   const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
-  const utilsKeys = [X, X, X];
   //const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
   //const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
@@ -85,14 +84,19 @@
   };
   let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
 
+  const handleInput = (key) => {
+    board[activeRow][activeCol] = String(key);
+    activeRow = -1;
+    activeCol = -1;
+  };
+
   const handleNumberInput = (key) => {
-    const isValidRow = checkRow(key);
-    const isValidCol = checkCol(key);
-    const isValid3x3 = check3x3(key);
+    const num = Number(key);
+    const isValidRow = checkRow(num);
+    const isValidCol = checkCol(num);
+    const isValid3x3 = check3x3(num);
     if (isValidRow && isValidCol && isValid3x3) {
-      board[activeRow][activeCol] = String(key);
-      activeRow = -1;
-      activeCol = -1;
+      handleInput(num);
       return;
     }
   };
@@ -100,7 +104,6 @@
 
 <svelte:window
   onkeydown={(e) => {
-    // FIXME: currently allows input even when button is disabled
     if (isAnyCellActive) {
       switch (e.key) {
         case '1':
@@ -116,7 +119,7 @@
           break;
         case 'Backspace':
           if (checkIsCellUserInput(activeRow, activeCol)) {
-            handleNumberInput(X);
+            handleInput(X);
           }
           break;
         default:
@@ -134,10 +137,9 @@
           <span class="game-cell-span">
             <button
               class="game-cell"
-              class:css-disabled={cell !== X}
-              class:btn-pressable={cell === X}
-              class:btn-active={compareCell(rowIndex, colIndex)}
-              class:btn-user-input={checkIsCellUserInput(rowIndex, colIndex)}
+              class:btn-info={compareCell(rowIndex, colIndex)}
+              class:btn-warning={checkIsCellUserInput(rowIndex, colIndex)}
+              disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)}
               onclick={() => {
                 const currentCellIsActive = compareCell(rowIndex, colIndex);
                 if (!currentCellIsActive) {
@@ -155,12 +157,11 @@
     {/each}
   </div>
 
-  <div class="game-input mt-12">
-    <div class="game-input-numbers space-x-1" class:hidden={!true}>
+  <div class="game-input mt-12" class:hidden={!isAnyCellActive && false}>
+    <div class="game-input-numbers space-x-1">
       {#each numberKeys as key}
         <button
           class="game-key"
-          class:btn-pressable={!invalidNumberKeys.has(key)}
           disabled={invalidNumberKeys.has(key)}
           onclick={() => handleNumberInput(key)}
         >
@@ -169,35 +170,19 @@
       {/each}
     </div>
 
-    <div class="game-input-utils space-x-1 mt-2 text-right" class:hidden={!true}>
-      {#each utilsKeys as key}
-        <button class="game-key" onclick={() => handleNumberInput(key)}>
-          {key}
-        </button>
-      {/each}
+    <div class="game-input-utils mt-4 text-right">
+      <button class="btn btn-outline btn-primary">Check</button>
+      <button class="game-key" onclick={() => handleInput(X)}>
+        {X}
+      </button>
     </div>
   </div>
 </div>
 
 <style>
-  :root {
-    --font-mono: monospace;
-    font-family: var(--font-mono);
-  }
-
   .game-cell,
   .game-key {
-    @apply text-lg btn btn-square;
-    /* just like me c: */
-    &.css-disabled {
-      @apply cursor-not-allowed no-animation;
-    }
-    &.btn-pressable {
-      @apply btn-outline;
-    }
-  }
-  .btn-user-input {
-    @apply btn-primary;
+    @apply text-lg btn btn-square btn-primary btn-outline;
   }
 
   .game-row {

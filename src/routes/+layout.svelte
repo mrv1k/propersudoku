@@ -13,6 +13,8 @@
       <btn class="btn btn-ghost text-lg no-animation">sudoku</btn>
     </div>
     <div class="flex-none">
+      <button class="btn btn-ghost">Restart</button>
+      <button class="btn btn-ghost">Share</button>
       <button class="btn btn-square btn-ghost" onclick={toggleSettings}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -41,6 +43,20 @@
     <div class="flex justify-end">
       <ul class="menu bg-base-200 rounded-box w-60 absolute">
         <li class="menu-title">Settings</li>
+
+        <li>
+          <label class="label cursor-pointer">
+            <span class="label-text">Phone input</span>
+            <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} />
+          </label>
+        </li>
+        <li>
+          <label class="label cursor-pointer">
+            <span class="label-text">Dark mode</span>
+            <input type="checkbox" class="toggle toggle-success rounded-md" checked={true} />
+          </label>
+        </li>
+
         <li>
           <label class="label cursor-pointer">
             <span class="label-text">Input validation</span>
@@ -50,15 +66,15 @@
 
         <li>
           <label class="label cursor-pointer">
-            <span class="label-text">Remember me</span>
+            <span class="label-text">Timer</span>
             <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} />
           </label>
         </li>
 
         <li>
           <label class="label cursor-pointer">
-            <span class="label-text">Remember me</span>
-            <input type="checkbox" class="toggle toggle-success rounded-md" checked={true} />
+            <span class="label-text">Left Hand</span>
+            <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} />
           </label>
         </li>
       </ul>
@@ -67,3 +83,10 @@
 </div>
 
 {@render children()}
+
+<style>
+  :root {
+    --font-mono: monospace;
+    font-family: var(--font-mono);
+  }
+</style>
