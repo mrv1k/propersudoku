@@ -1,7 +1,8 @@
 <script>
-  const keys = Array.from({ length: 9 }).map((_, i) => i + 1);
-
   const X = '-';
+
+  const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
+  const utilsKeys = [X, X, X];
   //const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
   //const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
@@ -82,7 +83,7 @@
     const square = get3x3Numbers();
     return new Set([...row, ...col, ...square].sort());
   };
-  let invalidKeys = $derived(findAlreadyUsedNumbers());
+  let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
 
   const handleNumberInput = (key) => {
     const isValidRow = checkRow(key);
@@ -99,6 +100,7 @@
 
 <svelte:window
   onkeydown={(e) => {
+    // FIXME: currently allows input even when button is disabled
     if (isAnyCellActive) {
       switch (e.key) {
         case '1':
@@ -113,8 +115,9 @@
           handleNumberInput(e.key);
           break;
         case 'Backspace':
-          // TODO: allow number removal without backspace on mobile
-          handleNumberInput(X);
+          if (checkIsCellUserInput(activeRow, activeCol)) {
+            handleNumberInput(X);
+          }
           break;
         default:
           break;
@@ -123,8 +126,8 @@
   }}
 />
 
-<div class="container mx-auto">
-  <div class="game-wrapper w-fit mx-auto">
+<div class="game-wrapper container w-fit mx-auto">
+  <div class="game-board">
     {#each board as rows, rowIndex}
       <div class="game-row">
         {#each rows as cell, colIndex}
@@ -136,12 +139,7 @@
               class:btn-active={compareCell(rowIndex, colIndex)}
               class:btn-user-input={checkIsCellUserInput(rowIndex, colIndex)}
               onclick={() => {
-                if (cell !== X) {
-                  return;
-                }
-
                 const currentCellIsActive = compareCell(rowIndex, colIndex);
-                console.log(currentCellIsActive);
                 if (!currentCellIsActive) {
                   activeRow = rowIndex;
                   activeCol = colIndex;
@@ -157,17 +155,27 @@
     {/each}
   </div>
 
-  <div class="game-keyboard mt-12 space-x-1 text-center" class:hidden={!isAnyCellActive}>
-    {#each keys as key}
-      <button
-        class="game-key"
-        class:btn-pressable={!invalidKeys.has(key)}
-        disabled={invalidKeys.has(key)}
-        onclick={() => handleNumberInput(key)}
-      >
-        {key}
-      </button>
-    {/each}
+  <div class="game-input mt-12">
+    <div class="game-input-numbers space-x-1" class:hidden={!true}>
+      {#each numberKeys as key}
+        <button
+          class="game-key"
+          class:btn-pressable={!invalidNumberKeys.has(key)}
+          disabled={invalidNumberKeys.has(key)}
+          onclick={() => handleNumberInput(key)}
+        >
+          {key}
+        </button>
+      {/each}
+    </div>
+
+    <div class="game-input-utils space-x-1 mt-2 text-right" class:hidden={!true}>
+      {#each utilsKeys as key}
+        <button class="game-key" onclick={() => handleNumberInput(key)}>
+          {key}
+        </button>
+      {/each}
+    </div>
   </div>
 </div>
 
