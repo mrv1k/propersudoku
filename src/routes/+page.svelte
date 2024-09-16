@@ -2,8 +2,6 @@
   const X = '-';
 
   const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
-  //const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
-  //const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
   // TODO: read & write state to url
   const initialBoard = [
@@ -19,15 +17,19 @@
   ];
   //const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
 
-  let board = $state(initialBoard);
+  const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
+  const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
+  let board = $state(emptyBoard);
   //let boardURL = $derived(board.map((row) => row.join('')).join(','));
 
-  //let isBoardInitiated = $state(false);
-  //$effect(() => {
-  //  if (isBoardInitiated) {
-  //    return;
-  //  }
-  //});
+  let isBoardInitiated = $state(false);
+  $effect(() => {
+    if (isBoardInitiated) {
+      return;
+    }
+    board = initialBoard;
+    isBoardInitiated = true;
+  });
 
   let activeRow = $state(-1);
   let activeCol = $state(-1);
@@ -158,7 +160,7 @@
   </div>
 
   <div class="game-input mt-12" class:hidden={!isAnyCellActive && false}>
-    <div class="game-input-numbers space-x-1">
+    <div class="game-input-numbers">
       {#each numberKeys as key}
         <button
           class="game-key"
@@ -170,11 +172,10 @@
       {/each}
     </div>
 
-    <div class="game-input-utils mt-4 text-right">
-      <button class="btn btn-outline btn-primary">Check</button>
-      <button class="game-key" onclick={() => handleInput(X)}>
-        {X}
-      </button>
+    <div class="game-input-utils mt-2 justify-end">
+      <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
+      <button class="btn btn-outline btn-primary" style="width: 81.25px;">Check</button>
+      <button class="game-key" onclick={() => handleInput(X)}>{X}</button>
     </div>
   </div>
 </div>
@@ -198,5 +199,10 @@
     &:nth-child(6) {
       @apply mr-0 border-r-2 border-solid border-sky-500;
     }
+  }
+
+  .game-input-numbers,
+  .game-input-utils {
+    @apply flex space-x-1;
   }
 </style>
