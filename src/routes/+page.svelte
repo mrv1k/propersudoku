@@ -87,7 +87,8 @@
 
   const solveInit = (board) => {
     const clone = cloneArray(board);
-    console.log(solve(clone));
+    solve(clone);
+    userBoard = clone;
   };
   const solve = (board) => {
     for (let row = 0; row < 9; row++) {
@@ -97,16 +98,17 @@
             console.count('k');
             if (checkAll(row, col, n, board)) {
               board[row][col] = String(n);
-              solve(board);
+              if (solve(board)) {
+                return true;
+              }
               board[row][col] = X;
             }
           }
-          console.log('solved');
-          return board;
+          return false; // no number worked
         }
       }
     }
-    console.log("derp'ed");
+    return true;
   };
 
   const setStub = new Set();
@@ -122,7 +124,7 @@
   };
   let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
 
-  const handleInput = (key) => {
+  const handleUserInput = (key) => {
     userBoard[userRow][userCol] = String(key);
     userRow = -1;
     userCol = -1;
@@ -130,7 +132,7 @@
 
   const handleNumberInput = (key) => {
     if (checkAll(key)) {
-      handleInput(key);
+      handleUserInput(key);
     }
   };
 </script>
@@ -152,7 +154,7 @@
           break;
         case 'Backspace':
           if (checkIsCellUserInput(userRow, userCol)) {
-            handleInput(X);
+            handleUserInput(X);
           }
           break;
         default:
@@ -213,7 +215,7 @@
       >
       <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
       <button class="btn btn-outline btn-primary" style="width: 81.25px;">Check</button>
-      <button class="game-key" onclick={() => handleInput(X)}>{X}</button>
+      <button class="game-key" onclick={() => handleUserInput(X)}>{X}</button>
     </div>
   </div>
 </div>
