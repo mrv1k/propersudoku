@@ -15,6 +15,7 @@
     [X, X, X, '4', '1', '9', X, X, '5'],
     [X, X, X, X, '8', X, X, '7', '9']
   ];
+
   //const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
 
   const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
@@ -34,12 +35,7 @@
   let userRow = $state(-1);
   let userCol = $state(-1);
 
-  const compareCell = (row, col) => {
-    //, gameRow, gameCol
-    //const r = gameRow ?? userRow;
-    //const c = gameCol ?? userCol;
-    return userRow === row && userCol === col;
-  };
+  const compareCell = (row, col) => userRow === row && userCol === col;
   let isAnyCellActive = $derived(!compareCell(-1, -1));
 
   let checkIsCellUserInput = (row, col) => initialBoard[row][col] !== board[row][col];
@@ -47,48 +43,41 @@
   const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
   const check = (arr, n) => !arr.includes(n);
 
-  const getColNumbers = () => getArrNumbers(board.map((row) => row[userCol]));
-  const checkCol = (key) => check(getColNumbers(), key);
+  const getColNumbers = (col) => getArrNumbers(board.map((row) => row[col]));
+  const checkCol = (col, num) => check(getColNumbers(col), num);
 
   const getRowNumbers = (row) => getArrNumbers(board[row]);
-  const checkRow = (key, row) => {
-    console.log({ key, row, userRow });
-    return check(getRowNumbers(), key);
-  };
+  const checkRow = (row, key) => check(getRowNumbers(row), key);
 
-  console.log(checkRow(6, 4));
-
-  const get3x3Numbers = () => {
+  const get3x3Numbers = (row, col) => {
     let square = [];
 
-    if (userRow < 3) {
+    if (row < 3) {
       square = board.slice(0, 3);
-    } else if (userRow < 6) {
+    } else if (row < 6) {
       square = board.slice(3, 6);
     } else {
       square = board.slice(6);
     }
 
-    if (userCol < 3) {
+    if (col < 3) {
       square = square.map((row) => row.slice(0, 3));
-    } else if (userCol < 6) {
+    } else if (col < 6) {
       square = square.map((row) => row.slice(3, 6));
     } else {
       square = square.map((row) => row.slice(6));
     }
     return getArrNumbers(square.flatMap((row) => row));
   };
-  const check3x3 = (key) => {
-    const square = get3x3Numbers();
-    return check(square, key);
-  };
+  const check3x3 = (row, col, key) => check(get3x3Numbers(row, col), key);
 
-  const checkAll = (key) => {
+  const checkAll = (gameRow, gameCol, key) => {
+    const row = gameRow ?? userRow;
+    const col = gameCol ?? userCol;
     const num = Number(key);
-    const isValidRow = checkRow(num, userRow);
-    const isValidCol = checkCol(num);
-    const isValid3x3 = check3x3(num);
-    console.log({ isValidRow, isValidCol, isValid3x3 });
+    const isValidRow = checkRow(row, num);
+    const isValidCol = checkCol(col, num);
+    const isValid3x3 = check3x3(row, col, num);
     return isValidRow && isValidCol && isValid3x3;
   };
 
@@ -96,14 +85,20 @@
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
         if (board[row][col] === X) {
-          for (let n = 0; n < 9; n++) {
+          for (let n = 1; n < 10; n++) {
+            console.count('k');
             if (checkAll(row, col, n)) {
-              console.log('yup');
+              board[row][col] = String(n);
+              solve();
+              board[row][col] = X;
             }
           }
+          console.log(board);
+          return;
         }
       }
     }
+    console.log('derp');
   };
 
   const setStub = new Set();
@@ -112,9 +107,9 @@
       return setStub;
     }
 
-    const row = getRowNumbers();
-    const col = getColNumbers();
-    const square = get3x3Numbers();
+    const row = getRowNumbers(userRow);
+    const col = getColNumbers(userCol);
+    const square = get3x3Numbers(userRow, userCol);
     return new Set([...row, ...col, ...square].sort());
   };
   let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
