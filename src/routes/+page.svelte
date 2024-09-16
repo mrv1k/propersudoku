@@ -31,46 +31,79 @@
     isBoardInitiated = true;
   });
 
-  let activeRow = $state(-1);
-  let activeCol = $state(-1);
+  let userRow = $state(-1);
+  let userCol = $state(-1);
 
-  const compareCell = (row, col) => activeRow === row && activeCol === col;
+  const compareCell = (row, col) => {
+    //, gameRow, gameCol
+    //const r = gameRow ?? userRow;
+    //const c = gameCol ?? userCol;
+    return userRow === row && userCol === col;
+  };
   let isAnyCellActive = $derived(!compareCell(-1, -1));
 
   let checkIsCellUserInput = (row, col) => initialBoard[row][col] !== board[row][col];
 
-  const getNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
-  const getRowNumbers = () => getNumbers(board[activeRow]);
-  const getColNumbers = () => getNumbers(board.map((row) => row[activeCol]));
-
+  const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
   const check = (arr, n) => !arr.includes(n);
-  const checkRow = (key) => check(getRowNumbers(), key);
+
+  const getColNumbers = () => getArrNumbers(board.map((row) => row[userCol]));
   const checkCol = (key) => check(getColNumbers(), key);
+
+  const getRowNumbers = (row) => getArrNumbers(board[row]);
+  const checkRow = (key, row) => {
+    console.log({ key, row, userRow });
+    return check(getRowNumbers(), key);
+  };
+
+  console.log(checkRow(6, 4));
 
   const get3x3Numbers = () => {
     let square = [];
 
-    if (activeRow < 3) {
+    if (userRow < 3) {
       square = board.slice(0, 3);
-    } else if (activeRow < 6) {
+    } else if (userRow < 6) {
       square = board.slice(3, 6);
     } else {
       square = board.slice(6);
     }
 
-    if (activeCol < 3) {
+    if (userCol < 3) {
       square = square.map((row) => row.slice(0, 3));
-    } else if (activeCol < 6) {
+    } else if (userCol < 6) {
       square = square.map((row) => row.slice(3, 6));
     } else {
       square = square.map((row) => row.slice(6));
     }
-    return getNumbers(square.flatMap((row) => row));
+    return getArrNumbers(square.flatMap((row) => row));
   };
-
   const check3x3 = (key) => {
     const square = get3x3Numbers();
     return check(square, key);
+  };
+
+  const checkAll = (key) => {
+    const num = Number(key);
+    const isValidRow = checkRow(num, userRow);
+    const isValidCol = checkCol(num);
+    const isValid3x3 = check3x3(num);
+    console.log({ isValidRow, isValidCol, isValid3x3 });
+    return isValidRow && isValidCol && isValid3x3;
+  };
+
+  const solve = () => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === X) {
+          for (let n = 0; n < 9; n++) {
+            if (checkAll(row, col, n)) {
+              console.log('yup');
+            }
+          }
+        }
+      }
+    }
   };
 
   const setStub = new Set();
@@ -87,19 +120,14 @@
   let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
 
   const handleInput = (key) => {
-    board[activeRow][activeCol] = String(key);
-    activeRow = -1;
-    activeCol = -1;
+    board[userRow][userCol] = String(key);
+    userRow = -1;
+    userCol = -1;
   };
 
   const handleNumberInput = (key) => {
-    const num = Number(key);
-    const isValidRow = checkRow(num);
-    const isValidCol = checkCol(num);
-    const isValid3x3 = check3x3(num);
-    if (isValidRow && isValidCol && isValid3x3) {
-      handleInput(num);
-      return;
+    if (checkAll(key)) {
+      handleInput(key);
     }
   };
 </script>
@@ -120,7 +148,7 @@
           handleNumberInput(e.key);
           break;
         case 'Backspace':
-          if (checkIsCellUserInput(activeRow, activeCol)) {
+          if (checkIsCellUserInput(userRow, userCol)) {
             handleInput(X);
           }
           break;
@@ -145,11 +173,11 @@
               onclick={() => {
                 const currentCellIsActive = compareCell(rowIndex, colIndex);
                 if (!currentCellIsActive) {
-                  activeRow = rowIndex;
-                  activeCol = colIndex;
+                  userRow = rowIndex;
+                  userCol = colIndex;
                 } else {
-                  activeRow = -1;
-                  activeCol = -1;
+                  userRow = -1;
+                  userCol = -1;
                 }
               }}>{cell}</button
             >
@@ -159,7 +187,7 @@
     {/each}
   </div>
 
-  <div class="game-input mt-12" class:hidden={!isAnyCellActive && false}>
+  <div class="game-input mt-12" class:hidden={!isAnyCellActive}>
     <div class="game-input-numbers">
       {#each numberKeys as key}
         <button
@@ -173,6 +201,9 @@
     </div>
 
     <div class="game-input-utils mt-2 justify-end">
+      <button class="btn btn-outline btn-secondary" style="width: 81.25px;" onclick={solve}
+        >Solve</button
+      >
       <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
       <button class="btn btn-outline btn-primary" style="width: 81.25px;">Check</button>
       <button class="game-key" onclick={() => handleInput(X)}>{X}</button>
