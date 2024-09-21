@@ -1,6 +1,9 @@
 <script>
-  const X = '-';
+  import { getContext } from 'svelte';
 
+  const settingInputValidation = getContext('settingInputValidation');
+
+  const X = '-';
   const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
 
   // TODO: read & write state to url
@@ -13,7 +16,7 @@
     ['7', X, X, X, '2', X, X, X, '6'],
     [X, '6', X, X, X, X, '2', '8', X],
     [X, X, X, '4', '1', '9', X, X, '5'],
-    [X, X, X, X, '8', X, X, '7', '9']
+    [X, X, X, X, '8', X, X, '7', '9'],
   ];
 
   //const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
@@ -124,7 +127,7 @@
   function isValid(board, row, col, c) {
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
-    console.log(blockRow, blockCol);
+    //console.log(blockRow, blockCol);
     for (let i = 0; i < 9; i++) {
       if (board[row][i] === c || board[i][col] === c) {
         return false;
@@ -138,10 +141,10 @@
     return true;
   }
 
-  const setStub = new Set();
+  const EMPTY_SET = new Set();
   const findAlreadyUsedNumbers = () => {
     if (!isAnyCellActive) {
-      return setStub;
+      return EMPTY_SET;
     }
 
     const row = getRowNumbers(userRow, userBoard);
@@ -149,7 +152,7 @@
     const square = get3x3Numbers(userRow, userCol, userBoard);
     return new Set([...row, ...col, ...square].sort());
   };
-  let invalidNumberKeys = $derived(findAlreadyUsedNumbers());
+  let invalidNumberKeys = $derived($settingInputValidation ? findAlreadyUsedNumbers() : EMPTY_SET);
 
   const handleUserInput = (key) => {
     userBoard[userRow][userCol] = String(key);
@@ -158,12 +161,16 @@
   };
 
   const handleNumberInput = (key) => {
-    const mine = checkAll(key);
-    const stolen = isValid(key);
-    console.log(mine, stolen);
-    if (mine) {
-      handleUserInput(key);
+    if ($settingInputValidation) {
+      //const mine = checkAll(key);
+      const stolen = isValid(userBoard, userRow, userCol, key);
+      if (stolen) {
+        handleUserInput(key);
+      }
+      return;
     }
+
+    handleUserInput(key);
   };
 </script>
 
@@ -182,6 +189,7 @@
         case '9':
           handleNumberInput(e.key);
           break;
+        case '-':
         case 'Backspace':
           if (checkIsCellUserInput(userRow, userCol)) {
             handleUserInput(X);
@@ -191,8 +199,7 @@
           break;
       }
     }
-  }}
-/>
+  }} />
 
 <div class="game-wrapper container w-fit mx-auto">
   <div class="game-board">
@@ -214,8 +221,7 @@
                   userRow = -1;
                   userCol = -1;
                 }
-              }}>{cell}</button
-            >
+              }}>{cell}</button>
           </span>
         {/each}
       </div>
@@ -228,8 +234,7 @@
         <button
           class="game-key"
           disabled={invalidNumberKeys.has(key)}
-          onclick={() => handleNumberInput(key)}
-        >
+          onclick={() => handleNumberInput(key)}>
           {key}
         </button>
       {/each}
@@ -241,8 +246,7 @@
         style="width: 81.25px;"
         onclick={() => {
           solveInit(initialBoard);
-        }}>Solve</button
-      >
+        }}>Solve</button>
       <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
       <button class="btn btn-outline btn-primary" style="width: 81.25px;">Check</button>
       <button class="game-key" onclick={() => handleUserInput(X)}>{X}</button>
