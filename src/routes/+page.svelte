@@ -1,5 +1,6 @@
 <script>
   import { getContext } from 'svelte';
+  import { Confetti } from 'svelte-confetti';
 
   const settingInputValidation = getContext('settingInputValidation');
 
@@ -18,13 +19,23 @@
     [X, X, X, '4', '1', '9', X, X, '5'],
     [X, X, X, X, '8', X, X, '7', '9'],
   ];
-
   //const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
+
+  const solveInit = (board) => {
+    const cloneArray = (items) =>
+      items.map((item) => (Array.isArray(item) ? cloneArray(item) : item));
+
+    const clone = cloneArray(board);
+    dfs(clone);
+    return clone;
+  };
 
   const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
   const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
   let userBoard = $state(emptyBoard);
+  let userBoardSolved = emptyBoard;
+
   //let boardURL = $derived(board.map((row) => row.join('')).join(','));
   let userRow = $state(-1);
   let userCol = $state(-1);
@@ -35,8 +46,14 @@
       return;
     }
     userBoard = initialBoard;
+    userBoardSolved = solveInit(initialBoard);
     isBoardInitiated = true;
   });
+
+  let userBoardFlat = $derived.by(() => userBoard.flat());
+  //$inspect(userBoard); // aka console.log
+  let isBoardFilled = $derived.by(() => userBoardFlat.every((v) => v !== X));
+  let isUserWin = $state(false);
 
   const compareCell = (row, col) => userRow === row && userCol === col;
   let isAnyCellActive = $derived(!compareCell(-1, -1));
@@ -83,14 +100,6 @@
     const isValidCol = checkCol(col, num, board);
     const isValid3x3 = check3x3(row, col, num, board);
     return isValidRow && isValidCol && isValid3x3;
-  };
-
-  const cloneArray = (items) =>
-    items.map((item) => (Array.isArray(item) ? cloneArray(item) : item));
-
-  const solveInit = (board) => {
-    const clone = cloneArray(board);
-    dfs(clone);
   };
 
   function dfs(board) {
@@ -140,6 +149,12 @@
     }
     return true;
   }
+
+  const checkBoard = () => {
+    const isSolved = userBoard.toString() === userBoardSolved.toString();
+    console.log(isSolved);
+    isUserWin = isSolved;
+  };
 
   const EMPTY_SET = new Set();
   const findAlreadyUsedNumbers = () => {
@@ -202,6 +217,19 @@
   }} />
 
 <div class="game-wrapper container w-fit mx-auto">
+  <div class="game-win-wrapper">
+    {#if isUserWin}
+      <Confetti
+        x={[-5, 5]}
+        y={[0, 0.1]}
+        delay={[0, 5000]}
+        duration={5000}
+        amount={666}
+        iterationCount={3}
+        fallDistance="100vh" />
+    {/if}
+  </div>
+
   <div class="game-board">
     {#each userBoard as rows, rowIndex}
       <div class="game-row">
@@ -240,15 +268,16 @@
       {/each}
     </div>
 
-    <div class="game-input-utils mt-2 justify-end">
+    <div class="game-input-utils mt-2 justify-between">
       <button
         class="btn btn-outline btn-secondary"
         style="width: 81.25px;"
         onclick={() => {
-          solveInit(initialBoard);
+          userBoard = solveInit(initialBoard);
         }}>Solve</button>
       <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
-      <button class="btn btn-outline btn-primary" style="width: 81.25px;">Check</button>
+      <button class="btn btn-outline btn-primary" style="width: 81.25px;" onclick={checkBoard}
+        >Check</button>
       <button class="game-key" onclick={() => handleUserInput(X)}>{X}</button>
     </div>
   </div>
@@ -278,5 +307,17 @@
   .game-input-numbers,
   .game-input-utils {
     @apply flex space-x-1;
+  }
+
+  .game-win-wrapper {
+    position: fixed;
+    top: -50px;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
   }
 </style>
