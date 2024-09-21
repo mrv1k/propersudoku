@@ -50,15 +50,24 @@
     isBoardInitiated = true;
   });
 
-  let userBoardFlat = $derived.by(() => userBoard.flat());
-  //$inspect(userBoard); // aka console.log
-  let isBoardFilled = $derived.by(() => userBoardFlat.every((v) => v !== X));
+  let isBoardWinChecked = $state(false);
   let isUserWin = $state(false);
+
+  const checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
+  const checkIsCellUserInput = (row, col) => !checkIsCell(row, col, userBoard, initialBoard);
+  const checkIsCellValid = (row, col) => checkIsCell(row, col, userBoard, userBoardSolved);
+
+  const checkBoard = () => {
+    isBoardWinChecked = true;
+    const isCorrect = userBoard.toString() === userBoardSolved.toString();
+    if (isCorrect) {
+      resetUserSelectedCell();
+    }
+    isUserWin = isCorrect;
+  };
 
   const compareCell = (row, col) => userRow === row && userCol === col;
   let isAnyCellActive = $derived(!compareCell(-1, -1));
-
-  let checkIsCellUserInput = (row, col) => initialBoard[row][col] !== userBoard[row][col];
 
   const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
   const check = (arr, n) => !arr.includes(n);
@@ -150,12 +159,6 @@
     return true;
   }
 
-  const checkBoard = () => {
-    const isSolved = userBoard.toString() === userBoardSolved.toString();
-    console.log(isSolved);
-    isUserWin = isSolved;
-  };
-
   const EMPTY_SET = new Set();
   const findAlreadyUsedNumbers = () => {
     if (!isAnyCellActive) {
@@ -169,10 +172,13 @@
   };
   let invalidNumberKeys = $derived($settingInputValidation ? findAlreadyUsedNumbers() : EMPTY_SET);
 
-  const handleUserInput = (key) => {
-    userBoard[userRow][userCol] = String(key);
+  const resetUserSelectedCell = () => {
     userRow = -1;
     userCol = -1;
+  };
+  const handleUserInput = (key) => {
+    userBoard[userRow][userCol] = String(key);
+    resetUserSelectedCell();
   };
 
   const handleNumberInput = (key) => {
@@ -238,7 +244,9 @@
             <button
               class="game-cell"
               class:btn-info={compareCell(rowIndex, colIndex)}
-              class:btn-warning={checkIsCellUserInput(rowIndex, colIndex)}
+              class:btn-success={isBoardWinChecked && checkIsCellValid(rowIndex, colIndex)}
+              class:btn-error={isBoardWinChecked && !checkIsCellValid(rowIndex, colIndex)}
+              class:btn-warning={!isBoardWinChecked && checkIsCellUserInput(rowIndex, colIndex)}
               disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)}
               onclick={() => {
                 const currentCellIsActive = compareCell(rowIndex, colIndex);
@@ -246,8 +254,7 @@
                   userRow = rowIndex;
                   userCol = colIndex;
                 } else {
-                  userRow = -1;
-                  userCol = -1;
+                  resetUserSelectedCell();
                 }
               }}>{cell}</button>
           </span>

@@ -13,7 +13,7 @@
     document.documentElement.dataset.theme = isDark ? 'garden' : 'dim';
   };
 
-  const settingInputValidation = writable(true);
+  const settingInputValidation = writable(false);
   setContext('settingInputValidation', settingInputValidation);
 
   const toggleInputValidation = () => {
@@ -29,7 +29,10 @@
     <div class="flex-none">
       <button class="btn btn-ghost">Restart</button>
       <button class="btn btn-ghost">Share</button>
-      <button class="btn btn-square btn-ghost" onclick={toggleSettings}>
+      <button
+        class="btn btn-square btn-ghost"
+        aria-label="toggle settings"
+        onclick={toggleSettings}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
