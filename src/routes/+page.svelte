@@ -124,11 +124,16 @@
   function isValid(board, row, col, c) {
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
+    console.log(blockRow, blockCol);
     for (let i = 0; i < 9; i++) {
-      if (board[row][i] === c || board[i][col] === c) return false;
+      if (board[row][i] === c || board[i][col] === c) {
+        return false;
+      }
       const curRow = blockRow + Math.floor(i / 3);
       const curCol = blockCol + Math.floor(i % 3);
-      if (board[curRow][curCol] === c) return false;
+      if (board[curRow][curCol] === c) {
+        return false;
+      }
     }
     return true;
   }
@@ -153,7 +158,10 @@
   };
 
   const handleNumberInput = (key) => {
-    if (checkAll(key)) {
+    const mine = checkAll(key);
+    const stolen = isValid(key);
+    console.log(mine, stolen);
+    if (mine) {
       handleUserInput(key);
     }
   };

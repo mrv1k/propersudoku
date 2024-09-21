@@ -5,6 +5,11 @@
 
   let isSettingsVisible = $state(false);
   const toggleSettings = () => (isSettingsVisible = !isSettingsVisible);
+
+  const toggleDarkMode = () => {
+    const isDark = document.documentElement.dataset.theme === 'dim';
+    document.documentElement.dataset.theme = isDark ? 'light' : 'dim';
+  };
 </script>
 
 <div class="layout-wrapper">
@@ -44,16 +49,21 @@
       <ul class="menu bg-base-200 rounded-box w-60 absolute">
         <li class="menu-title">Settings</li>
 
-        <li>
-          <label class="label cursor-pointer">
-            <span class="label-text">Phone input</span>
-            <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} />
-          </label>
-        </li>
+        <!-- <li> -->
+        <!--   <label class="label cursor-pointer"> -->
+        <!--     <span class="label-text">Phone input</span> -->
+        <!--     <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} /> -->
+        <!--   </label> -->
+        <!-- </li> -->
         <li>
           <label class="label cursor-pointer">
             <span class="label-text">Dark mode</span>
-            <input type="checkbox" class="toggle toggle-success rounded-md" checked={true} />
+            <input
+              type="checkbox"
+              class="toggle toggle-success rounded-md"
+              checked={true}
+              onclick={toggleDarkMode}
+            />
           </label>
         </li>
 
