@@ -30,6 +30,16 @@
       <button class="btn btn-ghost">Restart</button>
       <button class="btn btn-ghost">Share</button>
       <button
+        class="btn btn-outline btn-secondary"
+        style="width: 81.25px;"
+        onclick={() => {
+          userBoard = solveInit(initialBoard);
+        }}>Solve</button>
+      <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
+      <button class="btn btn-outline btn-primary" style="width: 81.25px;" onclick={checkBoard}
+        >Check</button>
+
+      <button
         class="btn btn-square btn-ghost"
         aria-label="toggle settings"
         onclick={toggleSettings}>
@@ -85,20 +95,6 @@
               onclick={toggleInputValidation} />
           </label>
         </li>
-
-        <!-- <li> -->
-        <!--   <label class="label cursor-pointer"> -->
-        <!--     <span class="label-text">Timer</span> -->
-        <!--     <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} /> -->
-        <!--   </label> -->
-        <!-- </li> -->
-
-        <!-- <li> -->
-        <!--   <label class="label cursor-pointer"> -->
-        <!--     <span class="label-text">Left Hand</span> -->
-        <!--     <input type="checkbox" class="toggle toggle-success rounded-md" checked={false} /> -->
-        <!--   </label> -->
-        <!-- </li> -->
       </ul>
     </div>
   {/if}

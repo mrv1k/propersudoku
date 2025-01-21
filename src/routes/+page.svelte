@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { getContext } from 'svelte';
   import { Confetti } from 'svelte-confetti';
 
@@ -273,18 +273,7 @@
           {key}
         </button>
       {/each}
-    </div>
 
-    <div class="game-input-utils mt-2 justify-between">
-      <button
-        class="btn btn-outline btn-secondary"
-        style="width: 81.25px;"
-        onclick={() => {
-          userBoard = solveInit(initialBoard);
-        }}>Solve</button>
-      <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
-      <button class="btn btn-outline btn-primary" style="width: 81.25px;" onclick={checkBoard}
-        >Check</button>
       <button class="game-key" onclick={() => handleUserInput(X)}>{X}</button>
     </div>
   </div>
