@@ -1,5 +1,6 @@
 const X = '-';
-const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
+const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1)
+export const INPUT = [...NUMBER_KEYS, X]
 
 // TODO: read & write state to url
 const initialBoard = [
@@ -21,27 +22,29 @@ export class GameState {
         userBoard = $state(emptyBoard);
         userRow = $state(-1);
         userCol = $state(-1);
+
+        isAnyCellActive = $derived(!this.compareCell(-1, -1));
         //let userBoardSolved = emptyBoard;
         constructor() { }
 
-        //resetUserSelectedCell() {
-        //        userRow = -1;
-        //        userCol = -1;
-        //};
-
-        mek(rowIndex: number, colIndex: number) {
-                const currentCellIsActive = compareCell(rowIndex, colIndex);
+        selectCell(rowIndex: number, colIndex: number) {
+                const currentCellIsActive = this.compareCell(rowIndex, colIndex);
                 if (!currentCellIsActive) {
-                        userRow = rowIndex;
-                        userCol = colIndex;
+                        this.userRow = rowIndex;
+                        this.userCol = colIndex;
                 } else {
-                        resetUserSelectedCell();
+                        this.deselectCell();
                 }
         }
 
+        deselectCell() {
+                this.userRow = -1;
+                this.userCol = -1;
+        };
+
         handleUserInput(key: string) {
-                userBoard[userRow][userCol] = String(key);
-                resetUserSelectedCell();
+                this.userBoard[this.userRow][this.userCol] = String(key);
+                this.deselectCell();
         };
 
         handleNumberInput(key: string) {
@@ -56,6 +59,16 @@ export class GameState {
 
                 this.handleUserInput(key);
         };
+
+        resetCellValue() {
+                this.handleUserInput(X)
+                //this.deselectCell()
+        }
+
+        compareCell(rowIndex: number, colIndex: number) {
+                return this.userRow === rowIndex && this.userCol === colIndex;
+        }
+
 }
 
 
@@ -78,8 +91,6 @@ export class GameState {
 //        isUserWin = isCorrect;
 //};
 
-//const compareCell = (row, col) => userRow === row && userCol === col;
-//let isAnyCellActive = $derived(!compareCell(-1, -1));
 //
 //const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
 //const check = (arr, n) => !arr.includes(n);

@@ -1,6 +1,6 @@
 <script lang="ts">
   //import { Confetti } from 'svelte-confetti';
-  import { GameState } from './GameState.svelte';
+  import { INPUT, GameState } from './GameState.svelte';
   const game = new GameState();
 </script>
 
@@ -58,27 +58,27 @@
 
             <!-- class:btn-info={compareCell(rowIndex, colIndex)} -->
             <!-- disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)} -->
-            <button class="game-cell" onclick={() => {}}>{cell}</button>
+            <button
+              class="game-cell"
+              onclick={() => {
+                game.selectCell(rowIndex, colIndex);
+              }}>{cell}</button>
           </span>
         {/each}
       </div>
     {/each}
   </div>
 
-  <!-- <div class="game-input mt-12" class:hidden={!isAnyCellActive}> -->
-  <!--   <div class="game-input-numbers"> -->
-  <!--     {#each numberKeys as key} -->
-  <!--       <button -->
-  <!--         class="game-key" -->
-  <!--         disabled={invalidNumberKeys.has(key)} -->
-  <!--         onclick={() => handleNumberInput(key)}> -->
-  <!--         {key} -->
-  <!--       </button> -->
-  <!--     {/each} -->
-  <!---->
-  <!--     <button class="game-key" onclick={() => handleUserInput(X)}>{X}</button> -->
-  <!--   </div> -->
-  <!-- </div> -->
+  <div class="game-input mt-12" class:hidden={!game.isAnyCellActive}>
+    <div class="game-input-numbers">
+      {#each INPUT as key}
+        <!-- disabled={invalidNumberKeys.has(key)} -->
+        <button class="game-key" onclick={() => game.handleNumberInput(key)}>
+          {key}
+        </button>
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>
