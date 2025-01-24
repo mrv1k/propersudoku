@@ -23,13 +23,12 @@ export class GameState {
         userRow = $state(-1);
         userCol = $state(-1);
 
-        isAnyCellActive = $derived(!this.compareCell(-1, -1));
+        isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
         //let userBoardSolved = emptyBoard;
         constructor() { }
 
         selectCell(rowIndex: number, colIndex: number) {
-                const currentCellIsActive = this.compareCell(rowIndex, colIndex);
-                if (!currentCellIsActive) {
+                if (!this.checkIsCellActive(rowIndex, colIndex)) {
                         this.userRow = rowIndex;
                         this.userCol = colIndex;
                 } else {
@@ -42,12 +41,7 @@ export class GameState {
                 this.userCol = -1;
         };
 
-        handleUserInput(key: string) {
-                this.userBoard[this.userRow][this.userCol] = String(key);
-                this.deselectCell();
-        };
-
-        handleNumberInput(key: string) {
+        setCellValue(key: string) {
                 //if ($settingInputValidation) {
                 //        //const mine = checkAll(key);
                 //        const stolen = isValid(userBoard, userRow, userCol, key);
@@ -57,18 +51,13 @@ export class GameState {
                 //        return;
                 //}
 
-                this.handleUserInput(key);
+                this.userBoard[this.userRow][this.userCol] = String(key);
+                this.deselectCell();
         };
 
-        resetCellValue() {
-                this.handleUserInput(X)
-                //this.deselectCell()
-        }
-
-        compareCell(rowIndex: number, colIndex: number) {
+        checkIsCellActive(rowIndex: number, colIndex: number) {
                 return this.userRow === rowIndex && this.userCol === colIndex;
         }
-
 }
 
 

@@ -56,10 +56,10 @@
             <!-- class:btn-error={isBoardWinChecked && !checkIsCellValid(rowIndex, colIndex)} -->
             <!-- class:btn-warning={!isBoardWinChecked && checkIsCellUserInput(rowIndex, colIndex)} -->
 
-            <!-- class:btn-info={compareCell(rowIndex, colIndex)} -->
             <!-- disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)} -->
             <button
               class="game-cell"
+              class:btn-info={game.checkIsCellActive(rowIndex, colIndex)}
               onclick={() => {
                 game.selectCell(rowIndex, colIndex);
               }}>{cell}</button>
@@ -73,7 +73,7 @@
     <div class="game-input-numbers">
       {#each INPUT as key}
         <!-- disabled={invalidNumberKeys.has(key)} -->
-        <button class="game-key" onclick={() => game.handleNumberInput(key)}>
+        <button class="game-key" onclick={() => game.setCellValue(key)}>
           {key}
         </button>
       {/each}
