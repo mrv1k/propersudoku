@@ -1,6 +1,3 @@
-import { getContext } from 'svelte';
-const settingInputValidation = getContext('settingInputValidation');
-
 const X = '-';
 const numberKeys = Array.from({ length: 9 }).map((_, i) => i + 1);
 
@@ -16,97 +13,115 @@ const initialBoard = [
         [X, X, X, '4', '1', '9', X, X, '5'],
         [X, X, X, X, '8', X, X, '7', '9'],
 ];
-//const initialBoardURL = initialBoard.map((row) => row.join('')).join(',');
-
-export const solveInit = (board) => {
-        const cloneArray = (items) =>
-                items.map((item) => (Array.isArray(item) ? cloneArray(item) : item));
-
-        const clone = cloneArray(board);
-        dfs(clone);
-        return clone;
-};
 
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
-let userBoard = $state(emptyBoard);
-let userBoardSolved = emptyBoard;
+export class GameState {
+        userBoard = $state(emptyBoard);
+        userRow = $state(-1);
+        userCol = $state(-1);
+        //let userBoardSolved = emptyBoard;
+        constructor() { }
 
-//let boardURL = $derived(board.map((row) => row.join('')).join(','));
-let userRow = $state(-1);
-let userCol = $state(-1);
+        //resetUserSelectedCell() {
+        //        userRow = -1;
+        //        userCol = -1;
+        //};
 
-let isBoardInitiated = $state(false);
-$effect(() => {
-        if (isBoardInitiated) {
-                return;
+        mek(rowIndex: number, colIndex: number) {
+                const currentCellIsActive = compareCell(rowIndex, colIndex);
+                if (!currentCellIsActive) {
+                        userRow = rowIndex;
+                        userCol = colIndex;
+                } else {
+                        resetUserSelectedCell();
+                }
         }
-        userBoard = initialBoard;
-        userBoardSolved = solveInit(initialBoard);
-        isBoardInitiated = true;
-});
 
-let isBoardWinChecked = $state(false);
-let isUserWin = $state(false);
-
-const checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
-const checkIsCellUserInput = (row, col) => !checkIsCell(row, col, userBoard, initialBoard);
-const checkIsCellValid = (row, col) => checkIsCell(row, col, userBoard, userBoardSolved);
-
-const checkBoard = () => {
-        isBoardWinChecked = true;
-        const isCorrect = userBoard.toString() === userBoardSolved.toString();
-        if (isCorrect) {
+        handleUserInput(key: string) {
+                userBoard[userRow][userCol] = String(key);
                 resetUserSelectedCell();
-        }
-        isUserWin = isCorrect;
-};
+        };
 
-const compareCell = (row, col) => userRow === row && userCol === col;
-let isAnyCellActive = $derived(!compareCell(-1, -1));
+        handleNumberInput(key: string) {
+                //if ($settingInputValidation) {
+                //        //const mine = checkAll(key);
+                //        const stolen = isValid(userBoard, userRow, userCol, key);
+                //        if (stolen) {
+                //                handleUserInput(key);
+                //        }
+                //        return;
+                //}
 
-const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
-const check = (arr, n) => !arr.includes(n);
+                this.handleUserInput(key);
+        };
+}
 
-const getColNumbers = (col, board) => getArrNumbers(board.map((row) => row[col]));
-const checkCol = (col, num, board) => check(getColNumbers(col, board), num);
 
-const getRowNumbers = (row, board) => getArrNumbers(board[row]);
-const checkRow = (row, key, board) => check(getRowNumbers(row, board), key);
 
-const get3x3Numbers = (row, col, board) => {
-        let square = [];
 
-        if (row < 3) {
-                square = board.slice(0, 3);
-        } else if (row < 6) {
-                square = board.slice(3, 6);
-        } else {
-                square = board.slice(6);
-        }
 
-        if (col < 3) {
-                square = square.map((row) => row.slice(0, 3));
-        } else if (col < 6) {
-                square = square.map((row) => row.slice(3, 6));
-        } else {
-                square = square.map((row) => row.slice(6));
-        }
-        return getArrNumbers(square.flatMap((row) => row));
-};
-const check3x3 = (row, col, key, board) => check(get3x3Numbers(row, col, board), key);
+//let isBoardWinChecked = $state(false);
+//let isUserWin = $state(false);
 
-const checkAll = (gameRow, gameCol, key, gameBoard) => {
-        const row = gameRow ?? userRow;
-        const col = gameCol ?? userCol;
-        const board = gameBoard ?? userBoard;
-        const num = Number(key);
-        const isValidRow = checkRow(row, num, board);
-        const isValidCol = checkCol(col, num, board);
-        const isValid3x3 = check3x3(row, col, num, board);
-        return isValidRow && isValidCol && isValid3x3;
-};
+//const checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
+//const checkIsCellUserInput = (row, col) => !checkIsCell(row, col, userBoard, initialBoard);
+//const checkIsCellValid = (row, col) => checkIsCell(row, col, userBoard, userBoardSolved);
+//
+//const checkBoard = () => {
+//        isBoardWinChecked = true;
+//        const isCorrect = userBoard.toString() === userBoardSolved.toString();
+//        if (isCorrect) {
+//                resetUserSelectedCell();
+//        }
+//        isUserWin = isCorrect;
+//};
+
+//const compareCell = (row, col) => userRow === row && userCol === col;
+//let isAnyCellActive = $derived(!compareCell(-1, -1));
+//
+//const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
+//const check = (arr, n) => !arr.includes(n);
+//
+//const getColNumbers = (col, board) => getArrNumbers(board.map((row) => row[col]));
+//const checkCol = (col, num, board) => check(getColNumbers(col, board), num);
+//
+//const getRowNumbers = (row, board) => getArrNumbers(board[row]);
+//const checkRow = (row, key, board) => check(getRowNumbers(row, board), key);
+//
+//const get3x3Numbers = (row, col, board) => {
+//        let square = [];
+//
+//        if (row < 3) {
+//                square = board.slice(0, 3);
+//        } else if (row < 6) {
+//                square = board.slice(3, 6);
+//        } else {
+//                square = board.slice(6);
+//        }
+//
+//        if (col < 3) {
+//                square = square.map((row) => row.slice(0, 3));
+//        } else if (col < 6) {
+//                square = square.map((row) => row.slice(3, 6));
+//        } else {
+//                square = square.map((row) => row.slice(6));
+//        }
+//        return getArrNumbers(square.flatMap((row) => row));
+//};
+//const check3x3 = (row, col, key, board) => check(get3x3Numbers(row, col, board), key);
+//
+//const checkAll = (gameRow, gameCol, key, gameBoard) => {
+//        const row = gameRow ?? userRow;
+//        const col = gameCol ?? userCol;
+//        const board = gameBoard ?? userBoard;
+//        const num = Number(key);
+//        const isValidRow = checkRow(row, num, board);
+//        const isValidCol = checkCol(col, num, board);
+//        const isValid3x3 = check3x3(row, col, num, board);
+//        return isValidRow && isValidCol && isValid3x3;
+//};
 
 function dfs(board) {
         // for every cell in the sudoku
@@ -156,37 +171,37 @@ function isValid(board, row, col, c) {
         return true;
 }
 
-const EMPTY_SET = new Set();
-const findAlreadyUsedNumbers = () => {
-        if (!isAnyCellActive) {
-                return EMPTY_SET;
-        }
+//const EMPTY_SET = new Set();
+//const findAlreadyUsedNumbers = () => {
+//        if (!isAnyCellActive) {
+//                return EMPTY_SET;
+//        }
+//
+//        const row = getRowNumbers(userRow, userBoard);
+//        const col = getColNumbers(userCol, userBoard);
+//        const square = get3x3Numbers(userRow, userCol, userBoard);
+//        return new Set([...row, ...col, ...square].sort());
+//};
+//let invalidNumberKeys = $derived($settingInputValidation ? findAlreadyUsedNumbers() : EMPTY_SET);
 
-        const row = getRowNumbers(userRow, userBoard);
-        const col = getColNumbers(userCol, userBoard);
-        const square = get3x3Numbers(userRow, userCol, userBoard);
-        return new Set([...row, ...col, ...square].sort());
-};
-let invalidNumberKeys = $derived($settingInputValidation ? findAlreadyUsedNumbers() : EMPTY_SET);
 
-const resetUserSelectedCell = () => {
-        userRow = -1;
-        userCol = -1;
-};
-const handleUserInput = (key) => {
-        userBoard[userRow][userCol] = String(key);
-        resetUserSelectedCell();
-};
 
-const handleNumberInput = (key) => {
-        if ($settingInputValidation) {
-                //const mine = checkAll(key);
-                const stolen = isValid(userBoard, userRow, userCol, key);
-                if (stolen) {
-                        handleUserInput(key);
-                }
-                return;
-        }
 
-        handleUserInput(key);
-};
+//let isBoardInitiated = $state(false);
+//
+//const solveInit = (board) => {
+//        const cloneArray = (items) =>
+//                items.map((item) => (Array.isArray(item) ? cloneArray(item) : item));
+//
+//        const clone = cloneArray(board);
+//        dfs(clone);
+//        return clone;
+//};
+//$effect(() => {
+//        if (isBoardInitiated) {
+//                return;
+//        }
+//        userBoard = initialBoard;
+//        userBoardSolved = solveInit(initialBoard);
+//        isBoardInitiated = true;
+//});
