@@ -1,6 +1,6 @@
 const X = '-';
-const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1)
-export const INPUT = [...NUMBER_KEYS, X]
+const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
+export const INPUT: string[] = [...NUMBER_KEYS, X]
 
 // TODO: read & write state to url
 const initialBoard = [
@@ -23,8 +23,7 @@ export class GameState {
   userRow = $state(-1);
   userCol = $state(-1);
 
-  isAnyCellActive = $derived(() => !this.checkIsCellActive(-1, -1));
-  //let userBoardSolved = emptyBoard;
+  isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
   constructor() { }
 
   selectCell(rowIndex: number, colIndex: number) {
@@ -54,14 +53,11 @@ export class GameState {
     this.deselectCell();
   };
 
-
-  checkIsCellActive(rowIndex: number, colIndex: number) {
-    console.log({ userRow: this.userRow, rowIndex, userCol: this.userCol, colIndex })
+  checkIsCellActive(rowIndex: number, colIndex: number): boolean {
     return this.userRow === rowIndex && this.userCol === colIndex;
   }
 
-  handleKeyboardInput(e: KeyboardEvent) {
-    console.log(e.key, this.isAnyCellActive)
+  handleKeyboardInput = (e: KeyboardEvent) => {
     if (!this.isAnyCellActive) {
       return
     }

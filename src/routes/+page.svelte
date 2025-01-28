@@ -2,10 +2,6 @@
   //import { Confetti } from 'svelte-confetti';
   import { INPUT, GameState } from './GameState.svelte';
   const game = new GameState();
-
-  //function handleKeydown(event) {
-  //  alert(`pressed the ${event.key} key`);
-  //}
 </script>
 
 <svelte:window onkeydown={game.handleKeyboardInput} />
