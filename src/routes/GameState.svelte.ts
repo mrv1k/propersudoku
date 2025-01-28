@@ -4,60 +4,90 @@ export const INPUT = [...NUMBER_KEYS, X]
 
 // TODO: read & write state to url
 const initialBoard = [
-        ['5', '3', X, X, '7', X, X, X, X],
-        ['6', X, X, '1', '9', '5', X, X, X],
-        [X, '9', '8', X, X, X, X, '6', X],
-        ['8', X, X, X, '6', X, X, X, '3'],
-        ['4', X, X, '8', X, '3', X, X, '1'],
-        ['7', X, X, X, '2', X, X, X, '6'],
-        [X, '6', X, X, X, X, '2', '8', X],
-        [X, X, X, '4', '1', '9', X, X, '5'],
-        [X, X, X, X, '8', X, X, '7', '9'],
+  ['5', '3', X, X, '7', X, X, X, X],
+  ['6', X, X, '1', '9', '5', X, X, X],
+  [X, '9', '8', X, X, X, X, '6', X],
+  ['8', X, X, X, '6', X, X, X, '3'],
+  ['4', X, X, '8', X, '3', X, X, '1'],
+  ['7', X, X, X, '2', X, X, X, '6'],
+  [X, '6', X, X, X, X, '2', '8', X],
+  [X, X, X, '4', '1', '9', X, X, '5'],
+  [X, X, X, X, '8', X, X, '7', '9'],
 ];
 
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
 export class GameState {
-        userBoard = $state(emptyBoard);
-        userRow = $state(-1);
-        userCol = $state(-1);
+  userBoard = $state(emptyBoard);
+  userRow = $state(-1);
+  userCol = $state(-1);
 
-        isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
-        //let userBoardSolved = emptyBoard;
-        constructor() { }
+  isAnyCellActive = $derived(() => !this.checkIsCellActive(-1, -1));
+  //let userBoardSolved = emptyBoard;
+  constructor() { }
 
-        selectCell(rowIndex: number, colIndex: number) {
-                if (!this.checkIsCellActive(rowIndex, colIndex)) {
-                        this.userRow = rowIndex;
-                        this.userCol = colIndex;
-                } else {
-                        this.deselectCell();
-                }
-        }
+  selectCell(rowIndex: number, colIndex: number) {
+    if (this.checkIsCellActive(rowIndex, colIndex)) {
+      return this.deselectCell();
+    }
+    this.userRow = rowIndex;
+    this.userCol = colIndex;
+  }
 
-        deselectCell() {
-                this.userRow = -1;
-                this.userCol = -1;
-        };
+  deselectCell() {
+    this.userRow = -1;
+    this.userCol = -1;
+  };
 
-        setCellValue(key: string) {
-                //if ($settingInputValidation) {
-                //        //const mine = checkAll(key);
-                //        const stolen = isValid(userBoard, userRow, userCol, key);
-                //        if (stolen) {
-                //                handleUserInput(key);
-                //        }
-                //        return;
-                //}
+  setCellValue(key: string) {
+    //if ($settingInputValidation) {
+    //        //const mine = checkAll(key);
+    //        const stolen = isValid(userBoard, userRow, userCol, key);
+    //        if (stolen) {
+    //                handleUserInput(key);
+    //        }
+    //        return;
+    //}
 
-                this.userBoard[this.userRow][this.userCol] = String(key);
-                this.deselectCell();
-        };
+    this.userBoard[this.userRow][this.userCol] = String(key);
+    this.deselectCell();
+  };
 
-        checkIsCellActive(rowIndex: number, colIndex: number) {
-                return this.userRow === rowIndex && this.userCol === colIndex;
-        }
+
+  checkIsCellActive(rowIndex: number, colIndex: number) {
+    console.log({ userRow: this.userRow, rowIndex, userCol: this.userCol, colIndex })
+    return this.userRow === rowIndex && this.userCol === colIndex;
+  }
+
+  handleKeyboardInput(e: KeyboardEvent) {
+    console.log(e.key, this.isAnyCellActive)
+    if (!this.isAnyCellActive) {
+      return
+    }
+
+    switch (e.key) {
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        this.setCellValue(e.key);
+        break;
+      case '-':
+      case '0':
+      case 'Backspace':
+      case 'Delete':
+        this.setCellValue(X);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 
@@ -124,51 +154,51 @@ export class GameState {
 //};
 
 function dfs(board) {
-        // for every cell in the sudoku
-        for (let row = 0; row < 9; row++) {
-                for (let col = 0; col < 9; col++) {
-                        // if its empty
-                        if (board[row][col] !== X) {
-                                continue;
-                        }
-                        // try every number 1-9
-                        for (let i = 1; i <= 9; i++) {
-                                const c = i.toString();
-                                // if that number is valid
-                                if (isValid(board, row, col, c)) {
-                                        board[row][col] = c;
-                                        // continue search for that board, ret true if solution is reached
-                                        if (dfs(board)) {
-                                                return true;
-                                        }
-                                }
-                        }
-                        // solution wasnt found for any num 1-9 here, must be a dead end...
-                        // set the current cell back to empty
-                        board[row][col] = X;
-                        // ret false to signal dead end
-                        return false;
-                }
+  // for every cell in the sudoku
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      // if its empty
+      if (board[row][col] !== X) {
+        continue;
+      }
+      // try every number 1-9
+      for (let i = 1; i <= 9; i++) {
+        const c = i.toString();
+        // if that number is valid
+        if (isValid(board, row, col, c)) {
+          board[row][col] = c;
+          // continue search for that board, ret true if solution is reached
+          if (dfs(board)) {
+            return true;
+          }
         }
-        // all cells filled, must be a solution
-        return true;
+      }
+      // solution wasnt found for any num 1-9 here, must be a dead end...
+      // set the current cell back to empty
+      board[row][col] = X;
+      // ret false to signal dead end
+      return false;
+    }
+  }
+  // all cells filled, must be a solution
+  return true;
 }
 
 function isValid(board, row, col, c) {
-        const blockRow = Math.floor(row / 3) * 3;
-        const blockCol = Math.floor(col / 3) * 3;
-        //console.log(blockRow, blockCol);
-        for (let i = 0; i < 9; i++) {
-                if (board[row][i] === c || board[i][col] === c) {
-                        return false;
-                }
-                const curRow = blockRow + Math.floor(i / 3);
-                const curCol = blockCol + Math.floor(i % 3);
-                if (board[curRow][curCol] === c) {
-                        return false;
-                }
-        }
-        return true;
+  const blockRow = Math.floor(row / 3) * 3;
+  const blockCol = Math.floor(col / 3) * 3;
+  //console.log(blockRow, blockCol);
+  for (let i = 0; i < 9; i++) {
+    if (board[row][i] === c || board[i][col] === c) {
+      return false;
+    }
+    const curRow = blockRow + Math.floor(i / 3);
+    const curCol = blockCol + Math.floor(i % 3);
+    if (board[curRow][curCol] === c) {
+      return false;
+    }
+  }
+  return true;
 }
 
 //const EMPTY_SET = new Set();
