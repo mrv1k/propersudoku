@@ -1,6 +1,11 @@
-const settings = $state({
+export const settings = $state({
   isVisible: true,
-  isValidateInput: false
+  isValidateInput: false,
+  isDarkMode: true
 })
 
-export default settings
+export const toggleDarkMode = () => {
+  const isDark = document.documentElement.dataset.theme === 'dim';
+  document.documentElement.dataset.theme = isDark ? 'garden' : 'dim';
+};
+

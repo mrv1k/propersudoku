@@ -1,13 +1,8 @@
 <script>
   import '../app.css';
-  import settings from './settings.svelte';
+  import { settings, toggleDarkMode } from './settings.svelte';
 
   let { children } = $props();
-
-  const toggleDarkMode = () => {
-    const isDark = document.documentElement.dataset.theme === 'dim';
-    document.documentElement.dataset.theme = isDark ? 'garden' : 'dim';
-  };
 </script>
 
 <div class="layout-wrapper">
@@ -69,7 +64,7 @@
             <input
               type="checkbox"
               class="toggle toggle-success rounded-md"
-              checked={true}
+              checked={settings.isDarkMode}
               onclick={toggleDarkMode} />
           </label>
         </li>

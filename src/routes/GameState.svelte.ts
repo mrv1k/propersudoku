@@ -1,4 +1,4 @@
-import settings from './settings.svelte';
+import { settings } from './settings.svelte';
 
 const X = '-';
 const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
