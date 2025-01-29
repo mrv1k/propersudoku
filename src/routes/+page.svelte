@@ -1,10 +1,38 @@
 <script lang="ts">
   //import { Confetti } from 'svelte-confetti';
   import { INPUT, GameState } from './GameState.svelte';
+
   const game = new GameState();
+
+  const handleKeyboardInput = (e: KeyboardEvent) => {
+    if (!game.isAnyCellActive) {
+      return;
+    }
+    switch (e.key) {
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        game.setCellValue(e.key);
+        break;
+      case '-':
+      case '0':
+      case 'Backspace':
+      case 'Delete':
+        game.resetCellValue();
+        break;
+      default:
+        break;
+    }
+  };
 </script>
 
-<svelte:window onkeydown={game.handleKeyboardInput} />
+<svelte:window onkeydown={handleKeyboardInput} />
 
 <div class="game-wrapper container w-fit mx-auto">
   <!--   <div class="game-win-wrapper"> -->

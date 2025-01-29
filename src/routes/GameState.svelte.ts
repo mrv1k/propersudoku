@@ -53,38 +53,15 @@ export class GameState {
     this.deselectCell();
   };
 
+  resetCellValue() {
+    this.setCellValue(X)
+  }
+
   checkIsCellActive(rowIndex: number, colIndex: number): boolean {
     return this.userRow === rowIndex && this.userCol === colIndex;
   }
-
-  handleKeyboardInput = (e: KeyboardEvent) => {
-    if (!this.isAnyCellActive) {
-      return
-    }
-
-    switch (e.key) {
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        this.setCellValue(e.key);
-        break;
-      case '-':
-      case '0':
-      case 'Backspace':
-      case 'Delete':
-        this.setCellValue(X);
-        break;
-      default:
-        break;
-    }
-  }
 }
+
 
 
 
