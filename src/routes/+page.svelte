@@ -53,12 +53,9 @@
       <div class="game-row">
         {#each rows as cell, colIndex}
           <span class="game-cell-span">
-            <!--
-              class:btn-success={isBoardWinChecked && checkIsCellValid(rowIndex, colIndex)}
-              -->
+            <!-- class:btn-success={isBoardWinChecked && checkIsCellValid(rowIndex, colIndex)} -->
             <!-- class:btn-error={isBoardWinChecked && !checkIsCellValid(rowIndex, colIndex)} -->
             <!-- class:btn-warning={!isBoardWinChecked && checkIsCellUserInput(rowIndex, colIndex)} -->
-
             <!-- disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)} -->
             <button
               class="game-cell"

@@ -1,23 +1,12 @@
 <script>
   import '../app.css';
-  import { writable } from 'svelte/store';
-  import { setContext } from 'svelte';
+  import settings from './settings.svelte';
 
   let { children } = $props();
-
-  let isSettingsVisible = $state(true);
-  const toggleSettings = () => (isSettingsVisible = !isSettingsVisible);
 
   const toggleDarkMode = () => {
     const isDark = document.documentElement.dataset.theme === 'dim';
     document.documentElement.dataset.theme = isDark ? 'garden' : 'dim';
-  };
-
-  const settingInputValidation = writable(false);
-  setContext('settingInputValidation', settingInputValidation);
-
-  const toggleInputValidation = () => {
-    settingInputValidation.update((v) => !v);
   };
 </script>
 
@@ -42,7 +31,7 @@
       <button
         class="btn btn-square btn-ghost"
         aria-label="toggle settings"
-        onclick={toggleSettings}>
+        onclick={() => (settings.isVisible = !settings.isVisible)}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -63,7 +52,7 @@
     </div>
   </div>
 
-  {#if isSettingsVisible}
+  {#if settings.isVisible}
     <div class="flex justify-end">
       <ul class="menu bg-base-200 rounded-box w-60 absolute">
         <li class="menu-title">Settings</li>
@@ -91,8 +80,8 @@
             <input
               type="checkbox"
               class="toggle toggle-success rounded-md"
-              checked={$settingInputValidation}
-              onclick={toggleInputValidation} />
+              checked={settings.isValidateInput}
+              onclick={() => (settings.isValidateInput = !settings.isValidateInput)} />
           </label>
         </li>
       </ul>
