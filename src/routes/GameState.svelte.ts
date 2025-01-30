@@ -1,4 +1,4 @@
-import { settings } from './settings.svelte';
+import type { Settings } from './settings.svelte';
 
 const X = '-';
 const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
@@ -27,7 +27,12 @@ export class GameState {
   userCol = $state(-1);
 
   isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
-  constructor() { }
+
+  settings: Settings
+
+  constructor(settings: Settings) {
+    this.settings = settings
+  }
 
   selectCell(rowIndex: number, colIndex: number) {
     if (this.checkIsCellActive(rowIndex, colIndex)) {
@@ -43,7 +48,7 @@ export class GameState {
   };
 
   setCellValue(key: string) {
-    if (settings.isValidateInput && !isValueValid(this.userBoard, this.userRow, this.userCol, key)) {
+    if (this.settings.isValidateInput && !isValueValid(this.userBoard, this.userRow, this.userCol, key)) {
       return
     }
 
@@ -52,7 +57,8 @@ export class GameState {
   };
 
   resetCellValue() {
-    this.setCellValue(X)
+    this.userBoard[this.userRow][this.userCol] = X
+    this.deselectCell();
   }
 
   checkIsCellActive(rowIndex: number, colIndex: number): boolean {
@@ -112,9 +118,13 @@ function isValueValid(board: Board, row: number, col: number, value: string) {
   const blockRow = Math.floor(row / 3) * 3;
   const blockCol = Math.floor(col / 3) * 3;
   for (let i = 0; i < 9; i++) {
-    if (board[row][i] === value || board[i][col] === value) {
+    if (board[row][i] === value) {
       return false;
     }
+    if (board[i][col] === value) {
+      return false;
+    }
+
     const curRow = blockRow + Math.floor(i / 3);
     const curCol = blockCol + Math.floor(i % 3);
     if (board[curRow][curCol] === value) {
