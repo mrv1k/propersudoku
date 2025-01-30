@@ -1,6 +1,6 @@
 export const settings = $state({
   isVisible: true,
-  isValidateInput: false,
+  isValidateInput: true,
   isDarkMode: true
 })
 

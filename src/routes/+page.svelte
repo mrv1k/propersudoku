@@ -4,6 +4,8 @@
   import { INPUT, GameState } from './GameState.svelte';
 
   const game = new GameState(settings);
+  $inspect(game.validNumbers);
+  $inspect(game.validNumbersSet);
 
   const handleKeyboardInput = (e: KeyboardEvent) => {
     if (!game.isAnyCellActive) {
@@ -73,8 +75,10 @@
   <div class="game-input mt-12" class:hidden={!game.isAnyCellActive}>
     <div class="game-input-numbers">
       {#each INPUT as key}
-        <!-- disabled={invalidNumberKeys.has(key)} -->
-        <button class="game-key" onclick={() => game.setCellValue(key)}>
+        <button
+          class="game-key"
+          disabled={!game.validNumbersSet.has(key)}
+          onclick={() => game.setCellValue(key)}>
           {key}
         </button>
       {/each}

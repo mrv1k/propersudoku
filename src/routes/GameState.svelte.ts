@@ -22,11 +22,13 @@ const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
 export class GameState {
-  userBoard = $state(emptyBoard);
+  userBoard = $state(initialBoard);
   userRow = $state(-1);
   userCol = $state(-1);
+  validNumbers: string[] = $state([])
 
   isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
+  validNumbersSet = $derived(new Set(this.validNumbers.filter(v => v !== X)))
 
   settings: Settings
 
@@ -40,6 +42,10 @@ export class GameState {
     }
     this.userRow = rowIndex;
     this.userCol = colIndex;
+
+    if (this.settings.isValidateInput) {
+      this.findValidNumbers()
+    }
   }
 
   deselectCell() {
@@ -47,22 +53,56 @@ export class GameState {
     this.userCol = -1;
   };
 
-  setCellValue(key: string) {
-    if (this.settings.isValidateInput && !isValueValid(this.userBoard, this.userRow, this.userCol, key)) {
+  setCellValue(key: string): void {
+    if (!this.isAnyCellActive) {
       return
     }
 
-    this.userBoard[this.userRow][this.userCol] = String(key);
+    if (key !== X && this.settings.isValidateInput) {
+      if (!checkIsValueValid(this.userBoard, this.userRow, this.userCol, key)) {
+        return
+      }
+    }
+
+    this.userBoard[this.userRow][this.userCol] = key;
     this.deselectCell();
   };
 
   resetCellValue() {
-    this.userBoard[this.userRow][this.userCol] = X
-    this.deselectCell();
+    this.setCellValue(X)
   }
 
   checkIsCellActive(rowIndex: number, colIndex: number): boolean {
     return this.userRow === rowIndex && this.userCol === colIndex;
+  }
+
+  findValidNumbers(): void {
+    this.validNumbers = NUMBER_KEYS.slice()
+
+    const row = this.userRow
+    const col = this.userCol
+
+    const blockRow = Math.floor(row / 3) * 3;
+    const blockCol = Math.floor(col / 3) * 3;
+
+    for (let i = 0; i < 9; i++) {
+      // use isNaN? -- to avoid coupling to X and enable invalid row / col / square clarification 
+      if (this.userBoard[row][i] !== X) {
+        const rowIndex = Number(this.userBoard[row][i]) - 1
+        this.validNumbers[rowIndex] = X
+      }
+      if (this.userBoard[i][col] !== X) {
+        const colIndex = Number(this.userBoard[i][col]) - 1
+        this.validNumbers[colIndex] = X
+      }
+
+      const curRow = blockRow + Math.floor(i / 3);
+      const curCol = blockCol + Math.floor(i % 3);
+      if (this.userBoard[curRow][curCol] !== X) {
+        const squareIndex = Number(this.userBoard[curRow][curCol]) - 1
+        this.validNumbers[squareIndex] = X
+      }
+    }
   }
 }
 
@@ -95,7 +135,7 @@ function dfs(board: Board) {
       for (let i = 1; i <= 9; i++) {
         const c = i.toString();
         // if that number is valid
-        if (isValueValid(board, row, col, c)) {
+        if (checkIsValueValid(board, row, col, c)) {
           board[row][col] = c;
           // continue search for that board, ret true if solution is reached
           if (dfs(board)) {
@@ -114,7 +154,7 @@ function dfs(board: Board) {
   return true;
 }
 
-function isValueValid(board: Board, row: number, col: number, value: string) {
+function checkIsValueValid(board: Board, row: number, col: number, value: string): boolean {
   const blockRow = Math.floor(row / 3) * 3;
   const blockCol = Math.floor(col / 3) * 3;
   for (let i = 0; i < 9; i++) {
@@ -134,23 +174,8 @@ function isValueValid(board: Board, row: number, col: number, value: string) {
   return true;
 }
 
-//const getArrNumbers = (arr = []) => arr.filter((n) => n !== X).map((n) => Number(n));
-//const check = (arr, n) => !arr.includes(n);
-//const getColNumbers = (col, board) => getArrNumbers(board.map((row) => row[col]));
-//const getRowNumbers = (row, board) => getArrNumbers(board[row]);
-//
-//const EMPTY_SET = new Set();
-//const findAlreadyUsedNumbers = () => {
-//  if (!isAnyCellActive) {
-//    return EMPTY_SET;
-//  }
-//
-//  const row = getRowNumbers(userRow, userBoard);
-//  const col = getColNumbers(userCol, userBoard);
-//  //const square = get3x3Numbers(userRow, userCol, userBoard);
-//  return new Set([...row, ...col, ...square].sort());
-//};
-//let invalidNumberKeys = $derived($settingInputValidation ? findAlreadyUsedNumbers() : EMPTY_SET);
+
+
 
 
 
