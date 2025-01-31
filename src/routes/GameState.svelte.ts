@@ -1,8 +1,12 @@
 import type { Settings } from './settings.svelte';
 
 const X = '-';
-const NUMBER_KEYS = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
-export const INPUT: string[] = [...NUMBER_KEYS, X]
+const NUMBERS_INPUT = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
+type NumberValidation = { value: string, valid: boolean, col: boolean, row: boolean, square: boolean }
+const VALIDATED_INPUT_TEMPLATE: NumberValidation[] = NUMBERS_INPUT.map(
+  n => ({ value: n, valid: true, col: true, row: true, square: true })
+)
+export const INPUT: string[] = [...NUMBERS_INPUT, X]
 
 type Board = string[][]
 // TODO: read & write state to url
@@ -25,10 +29,11 @@ export class GameState {
   userBoard = $state(initialBoard);
   userRow = $state(-1);
   userCol = $state(-1);
-  validNumbers: string[] = $state([])
-
   isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
-  validNumbersSet = $derived(new Set(this.validNumbers.filter(v => v !== X)))
+
+  validatedInput: NumberValidation[] = $state(VALIDATED_INPUT_TEMPLATE)
+  validatedInputNumbers: string[] = $derived(this.validatedInput.filter((v) => !v.valid).map((v) => v.value))
+  validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
   settings: Settings
 
@@ -43,9 +48,8 @@ export class GameState {
     this.userRow = rowIndex;
     this.userCol = colIndex;
 
-    if (this.settings.isValidateInput) {
-      this.findValidNumbers()
-    }
+    // need to reset empty in case player toggles input validation mid game 
+    this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
   }
 
   deselectCell() {
@@ -76,33 +80,39 @@ export class GameState {
     return this.userRow === rowIndex && this.userCol === colIndex;
   }
 
-  findValidNumbers(): void {
-    this.validNumbers = NUMBER_KEYS.slice()
+  validateInput(): NumberValidation[] {
+    const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
+    // classic deep close coz some of my homies have old android potato phones
+    const deepClone = <T>(arr: readonly T[]): T[] => JSON.parse(JSON.stringify(arr))
 
+    const validatedInput = deepClone(VALIDATED_INPUT_TEMPLATE)
     const row = this.userRow
     const col = this.userCol
-
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
 
     for (let i = 0; i < 9; i++) {
-      // use isNaN? -- to avoid coupling to X and enable invalid row / col / square clarification 
-      if (this.userBoard[row][i] !== X) {
+      if (isNumber(this.userBoard[row][i])) {
         const rowIndex = Number(this.userBoard[row][i]) - 1
-        this.validNumbers[rowIndex] = X
+        validatedInput[rowIndex].row = false
+        validatedInput[rowIndex].valid = false
       }
-      if (this.userBoard[i][col] !== X) {
+      if (isNumber(this.userBoard[i][col])) {
         const colIndex = Number(this.userBoard[i][col]) - 1
-        this.validNumbers[colIndex] = X
+        validatedInput[colIndex].col = false
+        validatedInput[colIndex].valid = false
       }
 
       const curRow = blockRow + Math.floor(i / 3);
       const curCol = blockCol + Math.floor(i % 3);
-      if (this.userBoard[curRow][curCol] !== X) {
+      if (isNumber(this.userBoard[curRow][curCol])) {
         const squareIndex = Number(this.userBoard[curRow][curCol]) - 1
-        this.validNumbers[squareIndex] = X
+        validatedInput[squareIndex].square = false
+        validatedInput[squareIndex].valid = false
       }
     }
+
+    return validatedInput
   }
 }
 

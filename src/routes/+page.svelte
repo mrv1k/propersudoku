@@ -77,7 +77,7 @@
       {#each INPUT as key}
         <button
           class="game-key"
-          disabled={!game.validNumbersSet.has(key)}
+          disabled={game.validatedInputNumbersSet.has(key)}
           onclick={() => game.setCellValue(key)}>
           {key}
         </button>
