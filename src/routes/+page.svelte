@@ -4,8 +4,6 @@
   import { INPUT, GameState } from './GameState.svelte';
 
   const game = new GameState(settings);
-  $inspect(game.validNumbers);
-  $inspect(game.validNumbersSet);
 
   const handleKeyboardInput = (e: KeyboardEvent) => {
     if (!game.isAnyCellActive) {

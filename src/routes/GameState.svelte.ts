@@ -25,6 +25,32 @@ const initialBoard: Board = [
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
+export class GameManager {
+  isBoardWinChecked = $state(false);
+  isUserWin = $state(false);
+  userBoardSolved = $derived(dfs(initialBoard))
+  userBoardSolvedString = $derived(this.userBoardSolved.toString())
+
+  settings: Settings
+
+  constructor(settings: Settings) {
+    this.settings = settings
+  }
+
+  checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
+  checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
+  checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.userBoardSolved);
+
+  checkBoard = () => {
+    this.isBoardWinChecked = true;
+    const isCorrect = this.userBoard.toString() === this.userBoardSolvedString
+    if (isCorrect) {
+      this.deselectCell();
+    }
+    this.isUserWin = isCorrect;
+  };
+}
+
 export class GameState {
   userBoard = $state(initialBoard);
   userRow = $state(-1);
@@ -35,11 +61,6 @@ export class GameState {
   validatedInputNumbers: string[] = $derived(this.validatedInput.filter((v) => !v.valid).map((v) => v.value))
   validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
-  settings: Settings
-
-  constructor(settings: Settings) {
-    this.settings = settings
-  }
 
   selectCell(rowIndex: number, colIndex: number) {
     if (this.checkIsCellActive(rowIndex, colIndex)) {
@@ -48,7 +69,7 @@ export class GameState {
     this.userRow = rowIndex;
     this.userCol = colIndex;
 
-    // need to reset empty in case player toggles input validation mid game 
+    // TODO: track start and end time of the game, disallow gameplay changing setting mid game
     this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
   }
 
@@ -116,23 +137,6 @@ export class GameState {
   }
 }
 
-//let isBoardWinChecked = $state(false);
-//let isUserWin = $state(false);
-
-//const checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
-//const checkIsCellUserInput = (row, col) => !checkIsCell(row, col, userBoard, initialBoard);
-//const checkIsCellValid = (row, col) => checkIsCell(row, col, userBoard, userBoardSolved);
-//
-//const checkBoard = () => {
-//        isBoardWinChecked = true;
-//        const isCorrect = userBoard.toString() === userBoardSolved.toString();
-//        if (isCorrect) {
-//                resetUserSelectedCell();
-//        }
-//        isUserWin = isCorrect;
-//};
-
-
 function dfs(board: Board) {
   // for every cell in the sudoku
   for (let row = 0; row < 9; row++) {
@@ -184,27 +188,3 @@ function checkIsValueValid(board: Board, row: number, col: number, value: string
   return true;
 }
 
-
-
-
-
-
-
-//let isBoardInitiated = $state(false);
-//
-//const solveInit = (board) => {
-//        const cloneArray = (items) =>
-//                items.map((item) => (Array.isArray(item) ? cloneArray(item) : item));
-//
-//        const clone = cloneArray(board);
-//        dfs(clone);
-//        return clone;
-//};
-//$effect(() => {
-//        if (isBoardInitiated) {
-//                return;
-//        }
-//        userBoard = initialBoard;
-//        userBoardSolved = solveInit(initialBoard);
-//        isBoardInitiated = true;
-//});
