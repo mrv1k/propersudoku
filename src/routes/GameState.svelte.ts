@@ -1,3 +1,4 @@
+import { getContext, setContext } from 'svelte';
 import type { Settings } from './settings.svelte';
 
 const X = '-';
@@ -25,34 +26,52 @@ const initialBoard: Board = [
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
-export class GameManager {
-  isBoardWinChecked = $state(false);
-  isUserWin = $state(false);
-  userBoardSolved = $derived(dfs(initialBoard))
-  userBoardSolvedString = $derived(this.userBoardSolved.toString())
+const GAME_MANAGER_KEY = Symbol('GameManager')
+
+export function setGameManager(settings: Settings) {
+  return setContext(GAME_MANAGER_KEY, new GameManager(settings))
+}
+export function getGameManager() {
+  return getContext<GameManager>(GAME_MANAGER_KEY)
+}
+
+class GameManager {
+  isWinChecked = $state(false);
+  isWin = $state(false);
 
   settings: Settings
+  game: Game
 
   constructor(settings: Settings) {
     this.settings = settings
+    this.game = new Game(this.settings, initialBoard)
   }
 
-  checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
-  checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
-  checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.userBoardSolved);
+  start() {
+    this.game = new Game(this.settings, initialBoard)
+    return this.game
+  }
+  stop() {
+    //this.game = undefined
+  }
+  restart() { }
 
-  checkBoard = () => {
-    this.isBoardWinChecked = true;
-    const isCorrect = this.userBoard.toString() === this.userBoardSolvedString
-    if (isCorrect) {
-      this.deselectCell();
-    }
-    this.isUserWin = isCorrect;
+  //checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
+  //checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
+  //checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.boardSolved);
+
+  solve() { }
+  check() {
+    //this.isWinChecked = true;
+    //const isCorrect = this.game.toString() === this.game.boardSolved.toString()
+    //if (isCorrect) {
+    //  this.game.deselectCell();
+    //}
+    //this.isWin = isCorrect;
   };
 }
 
-export class GameState {
-  userBoard = $state(initialBoard);
+class Game {
   userRow = $state(-1);
   userCol = $state(-1);
   isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
@@ -61,6 +80,17 @@ export class GameState {
   validatedInputNumbers: string[] = $derived(this.validatedInput.filter((v) => !v.valid).map((v) => v.value))
   validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
+  settings: Settings
+  initialBoard: Board
+  //initialBoardSolved: Board
+  userBoard: Board = $state(emptyBoard)
+
+  constructor(settings: Settings, initialBoard: Board) {
+    this.settings = settings
+    this.initialBoard = initialBoard
+    this.userBoard = initialBoard
+    //this.initialBoardSolved = initialBoard
+  }
 
   selectCell(rowIndex: number, colIndex: number) {
     if (this.checkIsCellActive(rowIndex, colIndex)) {
@@ -103,8 +133,6 @@ export class GameState {
 
   validateInput(): NumberValidation[] {
     const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
-    // classic deep close coz some of my homies have old android potato phones
-    const deepClone = <T>(arr: readonly T[]): T[] => JSON.parse(JSON.stringify(arr))
 
     const validatedInput = deepClone(VALIDATED_INPUT_TEMPLATE)
     const row = this.userRow
@@ -188,3 +216,5 @@ function checkIsValueValid(board: Board, row: number, col: number, value: string
   return true;
 }
 
+// classic deep close coz some of my homies have old android potato phones
+const deepClone = <T>(arr: readonly T[]): T[] => JSON.parse(JSON.stringify(arr))

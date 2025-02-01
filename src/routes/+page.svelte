@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { settings } from './settings.svelte';
   //import { Confetti } from 'svelte-confetti';
-  import { INPUT, GameState } from './GameState.svelte';
+  import { getGameManager, INPUT } from './GameState.svelte';
 
-  const game = new GameState(settings);
+  const gameManager = getGameManager();
+  const game = gameManager.game;
 
   const handleKeyboardInput = (e: KeyboardEvent) => {
     if (!game.isAnyCellActive) {

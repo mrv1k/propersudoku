@@ -1,8 +1,11 @@
 <script>
   import '../app.css';
+  import { setGameManager } from './GameState.svelte';
   import { settings, toggleDarkMode } from './settings.svelte';
 
   let { children } = $props();
+
+  const gameManager = setGameManager(settings);
 </script>
 
 <div class="layout-wrapper">
@@ -13,15 +16,8 @@
     <div class="flex-none">
       <button class="btn btn-ghost">Restart</button>
       <button class="btn btn-ghost">Share</button>
-      <!-- <button -->
-      <!--   class="btn btn-outline btn-secondary" -->
-      <!--   style="width: 81.25px;" -->
-      <!--   onclick={() => { -->
-      <!--     userBoard = solveInit(initialBoard); -->
-      <!-- }}>Solve</button> -->
-      <!-- on pc width of a button is 39x39 + margin is 3.25, so 2 are 81.25 -->
-      <!-- <button class="btn btn-outline btn-primary" style="width: 81.25px;" onclick={checkBoard} -->
-      <!--   >Check</button> -->
+      <button class="btn btn-outline btn-secondary" onclick={gameManager.solve}>Solve</button>
+      <button class="btn btn-outline btn-primary" onclick={gameManager.check}>Check</button>
 
       <button
         class="btn btn-square btn-ghost"
