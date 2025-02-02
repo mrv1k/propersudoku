@@ -6,6 +6,7 @@
   let { children } = $props();
 
   const gameManager = setGameManager(settings);
+  $effect(() => gameManager.start());
 </script>
 
 <div class="layout-wrapper">

@@ -3,10 +3,10 @@
   import { getGameManager, INPUT } from './GameState.svelte';
 
   const gameManager = getGameManager();
-  const game = gameManager.game;
+  const sudoku = gameManager.round;
 
   const handleKeyboardInput = (e: KeyboardEvent) => {
-    if (!game.isAnyCellActive) {
+    if (!sudoku.isAnyCellActive) {
       return;
     }
     switch (e.key) {
@@ -19,13 +19,13 @@
       case '7':
       case '8':
       case '9':
-        game.setCellValue(e.key);
+        sudoku.setCellValue(e.key);
         break;
       case '-':
       case '0':
       case 'Backspace':
       case 'Delete':
-        game.resetCellValue();
+        sudoku.resetCellValue();
         break;
       default:
         break;
@@ -50,7 +50,7 @@
   <!--   </div> -->
 
   <div class="game-board">
-    {#each game.userBoard as rows, rowIndex}
+    {#each sudoku.userBoard as rows, rowIndex}
       <div class="game-row">
         {#each rows as cell, colIndex}
           <span class="game-cell-span">
@@ -60,9 +60,9 @@
             <!-- disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)} -->
             <button
               class="game-cell"
-              class:btn-info={game.checkIsCellActive(rowIndex, colIndex)}
+              class:btn-info={sudoku.checkIsCellActive(rowIndex, colIndex)}
               onclick={() => {
-                game.selectCell(rowIndex, colIndex);
+                sudoku.selectCell(rowIndex, colIndex);
               }}>{cell}</button>
           </span>
         {/each}
@@ -70,13 +70,13 @@
     {/each}
   </div>
 
-  <div class="game-input mt-12" class:hidden={!game.isAnyCellActive}>
+  <div class="game-input mt-12" class:hidden={!sudoku.isAnyCellActive}>
     <div class="game-input-numbers">
       {#each INPUT as key}
         <button
           class="game-key"
-          disabled={game.validatedInputNumbersSet.has(key)}
-          onclick={() => game.setCellValue(key)}>
+          disabled={sudoku.validatedInputNumbersSet.has(key)}
+          onclick={() => sudoku.setCellValue(key)}>
           {key}
         </button>
       {/each}

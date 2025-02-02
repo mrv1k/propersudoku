@@ -28,50 +28,53 @@ const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
 const GAME_MANAGER_KEY = Symbol('GameManager')
 
-export function setGameManager(settings: Settings) {
+export function setGameManager(settings: Settings): GameManager {
   return setContext(GAME_MANAGER_KEY, new GameManager(settings))
 }
-export function getGameManager() {
+export function getGameManager(): GameManager {
   return getContext<GameManager>(GAME_MANAGER_KEY)
 }
 
 class GameManager {
-  isWinChecked = $state(false);
   isWin = $state(false);
+  isWinChecked = $state(false)
 
   settings: Settings
-  game: Game
+  round: Sudoku
 
   constructor(settings: Settings) {
     this.settings = settings
-    this.game = new Game(this.settings, initialBoard)
+    this.round = new Sudoku(this.settings, initialBoard)
   }
 
-  start() {
-    this.game = new Game(this.settings, initialBoard)
-    return this.game
+  start = () => {
+    this.round = new Sudoku(this.settings, initialBoard)
   }
-  stop() {
+
+  stop = () => {
     //this.game = undefined
   }
-  restart() { }
 
-  //checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
-  //checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
-  //checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.boardSolved);
+  restart = () => { }
 
-  solve() { }
-  check() {
-    //this.isWinChecked = true;
-    //const isCorrect = this.game.toString() === this.game.boardSolved.toString()
-    //if (isCorrect) {
-    //  this.game.deselectCell();
-    //}
-    //this.isWin = isCorrect;
+  solve = () => {
+    $inspect(this.round.userBoard)
+    //console.log('solveD', this.round.initialBoardSolved)
+    this.round.userBoard = this.round.initialBoardSolved
+  }
+
+  check = () => {
+    console.log('check', this)
+    this.isWinChecked = true;
+    const isCorrect = this.round.toString() === this.round.initialBoardSolved.toString()
+    if (isCorrect) {
+      this.round.deselectCell();
+    }
+    this.isWin = isCorrect;
   };
 }
 
-class Game {
+class Sudoku {
   userRow = $state(-1);
   userCol = $state(-1);
   isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
@@ -82,14 +85,14 @@ class Game {
 
   settings: Settings
   initialBoard: Board
-  //initialBoardSolved: Board
+  initialBoardSolved: Board
   userBoard: Board = $state(emptyBoard)
 
   constructor(settings: Settings, initialBoard: Board) {
     this.settings = settings
     this.initialBoard = initialBoard
+    this.initialBoardSolved = solve(initialBoard)
     this.userBoard = initialBoard
-    //this.initialBoardSolved = initialBoard
   }
 
   selectCell(rowIndex: number, colIndex: number) {
@@ -99,7 +102,8 @@ class Game {
     this.userRow = rowIndex;
     this.userCol = colIndex;
 
-    // TODO: track start and end time of the game, disallow gameplay changing setting mid game
+    // TODO: track start and end time of the game
+    // disallow gameplay changing setting mid game
     this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
   }
 
@@ -130,6 +134,10 @@ class Game {
   checkIsCellActive(rowIndex: number, colIndex: number): boolean {
     return this.userRow === rowIndex && this.userCol === colIndex;
   }
+
+  //checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
+  //checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
+  //checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.boardSolved);
 
   validateInput(): NumberValidation[] {
     const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
@@ -165,7 +173,13 @@ class Game {
   }
 }
 
-function dfs(board: Board) {
+function solve(board: Board): Board {
+  const solvedBoard = deepClone(board)
+  solveSudokuMutatingDFS(solvedBoard)
+  return solvedBoard
+}
+
+function solveSudokuMutatingDFS(board: Board): boolean {
   // for every cell in the sudoku
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -180,7 +194,7 @@ function dfs(board: Board) {
         if (checkIsValueValid(board, row, col, c)) {
           board[row][col] = c;
           // continue search for that board, ret true if solution is reached
-          if (dfs(board)) {
+          if (solveSudokuMutatingDFS(board)) {
             return true;
           }
         }
