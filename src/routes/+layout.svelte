@@ -1,12 +1,11 @@
 <script>
   import '../app.css';
-  import { setGameManager } from './GameState.svelte';
+  import { setSudoku } from './GameState.svelte';
   import { settings, toggleDarkMode } from './settings.svelte';
 
   let { children } = $props();
 
-  const gameManager = setGameManager(settings);
-  $effect(() => gameManager.start());
+  const sudoku = setSudoku(settings);
 </script>
 
 <div class="layout-wrapper">
@@ -15,10 +14,12 @@
       <btn class="btn btn-ghost text-lg no-animation">sudoku</btn>
     </div>
     <div class="flex-none">
-      <button class="btn btn-ghost">Restart</button>
+      <!-- TODO: start/restart should be one button -->
+      <button class="btn btn-ghost" onclick={sudoku.restart}>(re)Start</button>
+      <button class="btn btn-ghost" onclick={sudoku.check}>Check</button>
+      <!-- TODO: highlight solve button when the grid is full -->
+      <button class="btn btn-ghost" onclick={sudoku.solve}>Solve</button>
       <button class="btn btn-ghost">Share</button>
-      <button class="btn btn-outline btn-secondary" onclick={gameManager.solve}>Solve</button>
-      <button class="btn btn-outline btn-primary" onclick={gameManager.check}>Check</button>
 
       <button
         class="btn btn-square btn-ghost"

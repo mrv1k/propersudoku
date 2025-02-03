@@ -9,9 +9,10 @@ const VALIDATED_INPUT_TEMPLATE: NumberValidation[] = NUMBERS_INPUT.map(
 )
 export const INPUT: string[] = [...NUMBERS_INPUT, X]
 
-type Board = string[][]
+export type Board = string[][]
 // TODO: read & write state to url
-const initialBoard: Board = [
+
+const INITIAL_BOARD_STUB: Board = [
   ['5', '3', X, X, '7', X, X, X, X],
   ['6', X, X, '1', '9', '5', X, X, X],
   [X, '9', '8', X, X, X, X, '6', X],
@@ -26,74 +27,76 @@ const initialBoard: Board = [
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
 
-const GAME_MANAGER_KEY = Symbol('GameManager')
+const SUDOKU_KEY = Symbol('Sudoku')
 
-export function setGameManager(settings: Settings): GameManager {
-  return setContext(GAME_MANAGER_KEY, new GameManager(settings))
+export function setSudoku(settings: Settings): Sudoku {
+  return setContext(SUDOKU_KEY, new Sudoku(settings))
 }
-export function getGameManager(): GameManager {
-  return getContext<GameManager>(GAME_MANAGER_KEY)
-}
-
-class GameManager {
-  isWin = $state(false);
-  isWinChecked = $state(false)
-
-  settings: Settings
-  round: Sudoku
-
-  constructor(settings: Settings) {
-    this.settings = settings
-    this.round = new Sudoku(this.settings, initialBoard)
-  }
-
-  start = () => {
-    this.round = new Sudoku(this.settings, initialBoard)
-  }
-
-  stop = () => {
-    //this.game = undefined
-  }
-
-  restart = () => { }
-
-  solve = () => {
-    $inspect(this.round.userBoard)
-    //console.log('solveD', this.round.initialBoardSolved)
-    this.round.userBoard = this.round.initialBoardSolved
-  }
-
-  check = () => {
-    console.log('check', this)
-    this.isWinChecked = true;
-    const isCorrect = this.round.toString() === this.round.initialBoardSolved.toString()
-    if (isCorrect) {
-      this.round.deselectCell();
-    }
-    this.isWin = isCorrect;
-  };
+export function getSudoku(): Sudoku {
+  return getContext<Sudoku>(SUDOKU_KEY)
 }
 
 class Sudoku {
   userRow = $state(-1);
   userCol = $state(-1);
-  isAnyCellActive = $derived(!this.checkIsCellActive(-1, -1));
+  isAnyCellActive = $derived.by(() => !this.checkIsCellActive(-1, -1));
 
   validatedInput: NumberValidation[] = $state(VALIDATED_INPUT_TEMPLATE)
   validatedInputNumbers: string[] = $derived(this.validatedInput.filter((v) => !v.valid).map((v) => v.value))
   validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
+  isWin = $state(false);
+  isWinChecked = $state(false)
+
   settings: Settings
-  initialBoard: Board
-  initialBoardSolved: Board
+  initialBoard?: Board
+  initialBoardSolved?: Board
   userBoard: Board = $state(emptyBoard)
 
-  constructor(settings: Settings, initialBoard: Board) {
+  constructor(settings: Settings, initialBoard?: Board) {
     this.settings = settings
-    this.initialBoard = initialBoard
-    this.initialBoardSolved = solve(initialBoard)
-    this.userBoard = initialBoard
+
+    if (initialBoard) {
+      this.initialBoard = initialBoard
+      this.initialBoard = solve(initialBoard)
+      this.userBoard = initialBoard
+    } else {
+      // WIP
+      this.initialBoard = INITIAL_BOARD_STUB
+      this.initialBoardSolved = solve(INITIAL_BOARD_STUB)
+      this.userBoard = INITIAL_BOARD_STUB
+    }
   }
+
+  start = (): void => { }
+  stop = (): void => { }
+  restart = (): void => {
+    if (this.initialBoard) {
+      this.userBoard = this.initialBoard
+    }
+  }
+
+  //isUseHistory?: boolean -- todo add replayable history for solutions
+  solve = (): void => {
+    console.log('solve', this)
+    if (this.initialBoardSolved) {
+      this.userBoard = this.initialBoardSolved
+    }
+  }
+
+  check = () => {
+    // TODO: how to check when sudoku has multiple solutions?
+    // iterate over all solutions and store them?
+    console.log('check', this)
+    this.isWinChecked = true;
+    if (this.initialBoardSolved) {
+      const isCorrect = this.toString() === this.initialBoardSolved.toString()
+      if (isCorrect) {
+        this.deselectCell();
+      }
+      this.isWin = isCorrect;
+    }
+  };
 
   selectCell(rowIndex: number, colIndex: number) {
     if (this.checkIsCellActive(rowIndex, colIndex)) {
@@ -112,7 +115,7 @@ class Sudoku {
     this.userCol = -1;
   };
 
-  setCellValue(key: string): void {
+  setCellValue = (key: string): void => {
     if (!this.isAnyCellActive) {
       return
     }
@@ -127,11 +130,11 @@ class Sudoku {
     this.deselectCell();
   };
 
-  resetCellValue() {
+  resetCellValue = () => {
     this.setCellValue(X)
   }
 
-  checkIsCellActive(rowIndex: number, colIndex: number): boolean {
+  checkIsCellActive = (rowIndex: number, colIndex: number): boolean => {
     return this.userRow === rowIndex && this.userCol === colIndex;
   }
 
@@ -139,7 +142,7 @@ class Sudoku {
   //checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
   //checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.boardSolved);
 
-  validateInput(): NumberValidation[] {
+  validateInput = (): NumberValidation[] => {
     const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
 
     const validatedInput = deepClone(VALIDATED_INPUT_TEMPLATE)

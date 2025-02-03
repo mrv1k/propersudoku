@@ -1,9 +1,8 @@
 <script lang="ts">
   //import { Confetti } from 'svelte-confetti';
-  import { getGameManager, INPUT } from './GameState.svelte';
+  import { getSudoku, INPUT } from './GameState.svelte';
 
-  const gameManager = getGameManager();
-  const sudoku = gameManager.round;
+  const sudoku = getSudoku();
 
   const handleKeyboardInput = (e: KeyboardEvent) => {
     if (!sudoku.isAnyCellActive) {
