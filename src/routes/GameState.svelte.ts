@@ -71,9 +71,12 @@ class Sudoku {
   start = (): void => { }
   stop = (): void => { }
   restart = (): void => {
+    // should this even exist? shouln't creating a new game be easier way to reset?
     if (this.initialBoard) {
       this.userBoard = this.initialBoard
     }
+    this.isWin = false
+    this.isWinChecked = false
   }
 
   //isUseHistory?: boolean -- todo add replayable history for solutions
@@ -81,6 +84,7 @@ class Sudoku {
     console.log('solve', this)
     if (this.initialBoardSolved) {
       this.userBoard = this.initialBoardSolved
+      this.deselectCell();
     }
   }
 
@@ -134,13 +138,25 @@ class Sudoku {
     this.setCellValue(X)
   }
 
-  checkIsCellActive = (rowIndex: number, colIndex: number): boolean => {
-    return this.userRow === rowIndex && this.userCol === colIndex;
+  checkIsCellActive = (r: number, c: number): boolean => {
+    return this.userRow === r && this.userCol === c;
   }
 
-  //checkIsCell = (row, col, boardA, boardB) => boardA[row][col] === boardB[row][col];
-  //checkIsCellUserInput = (row, col) => !this.checkIsCell(row, col, this.userBoard, initialBoard);
-  //checkIsCellValid = (row, col) => this.checkIsCell(row, col, this.userBoard, this.boardSolved);
+  checkIsCell = (r: number, c: number, boardA: Board, boardB?: Board) => {
+    return boardB != null ? boardA[r][c] === boardB[r][c] : false
+  }
+
+  checkIsCellUserInput = (r: number, c: number) => {
+    return !this.checkIsCell(r, c, this.userBoard, this.initialBoard);
+  }
+
+  checkIsCellInactive = (r: number, c: number, cellValue: string): boolean => {
+    return cellValue !== X && !this.checkIsCellUserInput(r, c)
+  }
+
+  checkIsCellValid = (r: number, c: number) => {
+    return this.checkIsCell(r, c, this.userBoard, this.initialBoardSolved);
+  }
 
   validateInput = (): NumberValidation[] => {
     const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))

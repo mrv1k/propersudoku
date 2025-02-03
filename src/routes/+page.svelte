@@ -1,5 +1,5 @@
 <script lang="ts">
-  //import { Confetti } from 'svelte-confetti';
+  import { Confetti } from 'svelte-confetti';
   import { getSudoku, INPUT } from './GameState.svelte';
 
   const sudoku = getSudoku();
@@ -35,30 +35,31 @@
 <svelte:window onkeydown={handleKeyboardInput} />
 
 <div class="game-wrapper container w-fit mx-auto">
-  <!--   <div class="game-win-wrapper"> -->
-  <!--     {#if isUserWin} -->
-  <!--       <Confetti -->
-  <!--         x={[-5, 5]} -->
-  <!--         y={[0, 0.1]} -->
-  <!--         delay={[0, 5000]} -->
-  <!--         duration={5000} -->
-  <!--         amount={666} -->
-  <!--         iterationCount={3} -->
-  <!--         fallDistance="100vh" /> -->
-  <!--     {/if} -->
-  <!--   </div> -->
+  <div class="game-win-wrapper">
+    {#if sudoku.isWin}
+      <Confetti
+        x={[-5, 5]}
+        y={[0, 0.1]}
+        delay={[0, 5000]}
+        duration={5000}
+        amount={666}
+        iterationCount={3}
+        fallDistance="100vh" />
+    {/if}
+  </div>
 
   <div class="game-board">
     {#each sudoku.userBoard as rows, rowIndex}
       <div class="game-row">
         {#each rows as cell, colIndex}
           <span class="game-cell-span">
-            <!-- class:btn-success={isBoardWinChecked && checkIsCellValid(rowIndex, colIndex)} -->
-            <!-- class:btn-error={isBoardWinChecked && !checkIsCellValid(rowIndex, colIndex)} -->
-            <!-- class:btn-warning={!isBoardWinChecked && checkIsCellUserInput(rowIndex, colIndex)} -->
-            <!-- disabled={cell !== X && !checkIsCellUserInput(rowIndex, colIndex)} -->
             <button
               class="game-cell"
+              class:btn-success={sudoku.isWinChecked && sudoku.checkIsCellValid(rowIndex, colIndex)}
+              class:btn-error={sudoku.isWinChecked && !sudoku.checkIsCellValid(rowIndex, colIndex)}
+              class:btn-warning={!sudoku.isWinChecked &&
+                sudoku.checkIsCellUserInput(rowIndex, colIndex)}
+              disabled={sudoku.checkIsCellInactive(rowIndex, colIndex, cell)}
               class:btn-info={sudoku.checkIsCellActive(rowIndex, colIndex)}
               onclick={() => {
                 sudoku.selectCell(rowIndex, colIndex);
