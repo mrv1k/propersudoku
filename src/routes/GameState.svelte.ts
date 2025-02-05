@@ -9,11 +9,12 @@ const VALIDATED_INPUT_TEMPLATE: NumberValidation[] = NUMBERS_INPUT.map(
 )
 export const INPUT: string[] = [...NUMBERS_INPUT, X]
 
-export type Board = string[][]
 // TODO: read & write state to url
 
+export type Board = string[][];
+
 const INITIAL_BOARD_STUB: Board = [
-  ['5', '3', X, X, '7', X, X, X, X],
+  ['2', '9', X, X, '7', X, X, X, X],
   ['6', X, X, '1', '9', '5', X, X, X],
   [X, '9', '8', X, X, X, X, '6', X],
   ['8', X, X, X, '6', X, X, X, '3'],
@@ -23,6 +24,21 @@ const INITIAL_BOARD_STUB: Board = [
   [X, X, X, '4', '1', '9', X, X, '5'],
   [X, X, X, X, '8', X, X, '7', '9'],
 ];
+
+
+const BOARD_WITH_MULTIPLE_SOLUTIONS: Board = [
+  [2, 9, 5, 7, 4, 3, 8, 6, 1],
+  [4, 3, 1, 8, 6, 5, 9, X, X],
+  [8, 7, 6, 1, 9, 2, 5, 4, 3],
+  [3, 8, 7, 4, 5, 9, 2, 1, 6],
+  [6, 1, 2, 3, 8, 7, 4, 9, 5],
+  [5, 4, 9, 2, 1, 6, 7, 3, 8],
+  [7, 6, 3, 5, 2, 4, 1, 8, 9],
+  [9, 2, 8, 6, 7, 1, 3, 5, 4],
+  [1, 5, 4, 9, 3, 8, 6, X, X],
+].map(row => row.map(cell => String(cell)))
+
+const devBoardStub = BOARD_WITH_MULTIPLE_SOLUTIONS
 
 const emptyBoardRow = Array.from({ length: 9 }).map(() => X);
 const emptyBoard = Array.from({ length: 9 }).map(() => [...emptyBoardRow]);
@@ -67,9 +83,9 @@ class Sudoku {
       this.userBoard = initialBoard
     } else {
       // WIP
-      this.initialBoard = INITIAL_BOARD_STUB
-      this.initialBoardSolved = solve(INITIAL_BOARD_STUB)
-      this.userBoard = INITIAL_BOARD_STUB
+      this.initialBoard = devBoardStub
+      this.initialBoardSolved = solve(devBoardStub)
+      this.userBoard = devBoardStub
     }
   }
 
@@ -100,8 +116,10 @@ class Sudoku {
     console.log('check')
     this.isWinChecked = true;
     if (this.initialBoardSolved) {
-      console.log('if')
-      let isCorrect = true;
+      //let isCorrect = userBoard
+
+      const isCorrect = this.userBoard.toString() === this.initialBoardSolved.toString()
+      console.log('if', isCorrect)
       if (isCorrect) {
         this.deselectCell();
       }
