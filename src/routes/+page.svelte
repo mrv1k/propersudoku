@@ -30,6 +30,7 @@
         break;
     }
   };
+  $inspect(sudoku.isWin);
 </script>
 
 <svelte:window onkeydown={handleKeyboardInput} />

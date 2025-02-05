@@ -15,11 +15,11 @@
     </div>
     <div class="flex-none">
       <!-- TODO: start/restart should be one button -->
-      <button class="btn btn-ghost" onclick={sudoku.restart}>(re)Start</button>
       <button class="btn btn-ghost" onclick={sudoku.check}>Check</button>
       <!-- TODO: highlight solve button when the grid is full -->
       <button class="btn btn-ghost" onclick={sudoku.solve}>Solve</button>
       <button class="btn btn-ghost">Share</button>
+      <button class="btn btn-ghost" onclick={sudoku.restart}>Restart</button>
 
       <button
         class="btn btn-square btn-ghost"

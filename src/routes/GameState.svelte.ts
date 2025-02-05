@@ -47,14 +47,19 @@ class Sudoku {
 
   isWin = $state(false);
   isWinChecked = $state(false)
+  // isUsedSolver = $state(false)
 
   settings: Settings
   initialBoard?: Board
   initialBoardSolved?: Board
   userBoard: Board = $state(emptyBoard)
 
+  startTime: number
+  endTime: number = 0
+
   constructor(settings: Settings, initialBoard?: Board) {
     this.settings = settings
+    this.startTime = Date.now()
 
     if (initialBoard) {
       this.initialBoard = initialBoard
@@ -68,8 +73,11 @@ class Sudoku {
     }
   }
 
-  start = (): void => { }
-  stop = (): void => { }
+  // these methods feel like the belong on a game manager
+  // start = (): void => { }
+  stop = (): void => {
+    this.endTime = Date.now()
+  }
   restart = (): void => {
     // should this even exist? shouln't creating a new game be easier way to reset?
     if (this.initialBoard) {
@@ -89,12 +97,11 @@ class Sudoku {
   }
 
   check = () => {
-    // TODO: how to check when sudoku has multiple solutions?
-    // iterate over all solutions and store them?
-    console.log('check', this)
+    console.log('check')
     this.isWinChecked = true;
     if (this.initialBoardSolved) {
-      const isCorrect = this.toString() === this.initialBoardSolved.toString()
+      console.log('if')
+      let isCorrect = true;
       if (isCorrect) {
         this.deselectCell();
       }
