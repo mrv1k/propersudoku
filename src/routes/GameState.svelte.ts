@@ -3,9 +3,15 @@ import type { Settings } from './settings.svelte';
 
 const X = '-';
 const NUMBERS_INPUT = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
-type NumberValidation = { value: string, valid: boolean, col: boolean, row: boolean, square: boolean }
+type NumberValidation = {
+  value: string,
+  isUsed: boolean,
+  isUsedInRow: boolean,
+  isUsedInCol: boolean,
+  isUsedInSquare: boolean
+}
 const VALIDATED_INPUT_TEMPLATE: NumberValidation[] = NUMBERS_INPUT.map(
-  n => ({ value: n, valid: true, col: true, row: true, square: true })
+  n => ({ value: n, isUsed: false, isUsedInRow: false, isUsedInCol: false, isUsedInSquare: false })
 )
 export const INPUT: string[] = [...NUMBERS_INPUT, X]
 
@@ -58,7 +64,9 @@ class Sudoku {
   isAnyCellActive = $derived.by(() => !this.checkIsCellActive(-1, -1));
 
   validatedInput: NumberValidation[] = $state(VALIDATED_INPUT_TEMPLATE)
-  validatedInputNumbers: string[] = $derived(this.validatedInput.filter((v) => !v.valid).map((v) => v.value))
+  validatedInputNumbers: string[] = $derived(
+    this.validatedInput.filter((v) => v.isUsed).map((v) => v.value)
+  )
   validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
   isWin = $state(false);
@@ -79,12 +87,12 @@ class Sudoku {
 
     if (initialBoard) {
       this.initialBoard = initialBoard
-      this.initialBoard = solve(initialBoard)
+      //this.initialBoardSolved = solve(initialBoard)
       this.userBoard = initialBoard
     } else {
       // WIP
       this.initialBoard = devBoardStub
-      this.initialBoardSolved = solve(devBoardStub)
+      //this.initialBoardSolved = solve(devBoardStub)
       this.userBoard = devBoardStub
     }
   }
@@ -118,9 +126,8 @@ class Sudoku {
     let isMek = this.userBoard.every((rowArr, row) => {
       console.log('row', rowArr)
       rowArr.some((cellValue, col) => {
-        const x = checkIsValueValid(this.userBoard, row, col, cellValue)
-        console.log({ x, row, col, cellValue })
-        return x
+        console.log({ row, col, cellValue })
+        return false
       }
       )
       return true
@@ -142,7 +149,8 @@ class Sudoku {
 
     // TODO: track start and end time of the game
     // disallow gameplay changing setting mid game
-    this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
+    //this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
+    this.validatedInput = this.validateInput()
   }
 
   deselectCell() {
@@ -155,6 +163,7 @@ class Sudoku {
       return
     }
 
+    // prevent invalid keyboard input
     if (key !== X && this.settings.isValidateInput) {
       if (!checkIsValueValid(this.userBoard, this.userRow, this.userCol, key)) {
         return
@@ -197,25 +206,26 @@ class Sudoku {
     const col = this.userCol
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
+    console.log({ row, col, blockCol, blockRow })
 
     for (let i = 0; i < 9; i++) {
       if (isNumber(this.userBoard[row][i])) {
         const rowIndex = Number(this.userBoard[row][i]) - 1
-        validatedInput[rowIndex].row = false
-        validatedInput[rowIndex].valid = false
+        validatedInput[rowIndex].isUsedInRow = true
+        validatedInput[rowIndex].isUsed = true
       }
       if (isNumber(this.userBoard[i][col])) {
         const colIndex = Number(this.userBoard[i][col]) - 1
-        validatedInput[colIndex].col = false
-        validatedInput[colIndex].valid = false
+        validatedInput[colIndex].isUsedInCol = true
+        validatedInput[colIndex].isUsed = true
       }
 
       const curRow = blockRow + Math.floor(i / 3);
       const curCol = blockCol + Math.floor(i % 3);
       if (isNumber(this.userBoard[curRow][curCol])) {
         const squareIndex = Number(this.userBoard[curRow][curCol]) - 1
-        validatedInput[squareIndex].square = false
-        validatedInput[squareIndex].valid = false
+        validatedInput[squareIndex].isUsedInSquare = true
+        validatedInput[squareIndex].isUsed = true
       }
     }
 
