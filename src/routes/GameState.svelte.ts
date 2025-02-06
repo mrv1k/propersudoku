@@ -105,7 +105,6 @@ class Sudoku {
 
   //isUseHistory?: boolean -- todo add replayable history for solutions
   solve = (): void => {
-    console.log('solve', this)
     if (this.initialBoardSolved) {
       this.userBoard = this.initialBoardSolved
       this.deselectCell();
@@ -113,19 +112,26 @@ class Sudoku {
   }
 
   check = () => {
-    console.log('check')
     this.isWinChecked = true;
-    if (this.initialBoardSolved) {
-      //let isCorrect = userBoard
-
-      const isCorrect = this.userBoard.toString() === this.initialBoardSolved.toString()
-      console.log('if', isCorrect)
-      if (isCorrect) {
-        this.deselectCell();
+    //const isCorrect = this.userBoard.toString() === this.initialBoardSolved.toString()
+    //console.log(this.userBoard)
+    let isMek = this.userBoard.every((rowArr, row) => {
+      console.log('row', rowArr)
+      rowArr.some((cellValue, col) => {
+        const x = checkIsValueValid(this.userBoard, row, col, cellValue)
+        console.log({ x, row, col, cellValue })
+        return x
       }
-      this.isWin = isCorrect;
+      )
+      return true
+    })
+    const isCorrect = false
+
+    if (isCorrect) {
+      this.deselectCell();
     }
-  };
+    this.isWin = isCorrect;
+  }
 
   selectCell(rowIndex: number, colIndex: number) {
     if (this.checkIsCellActive(rowIndex, colIndex)) {
