@@ -3,14 +3,14 @@ import type { Settings } from './settings.svelte';
 
 const X = '-';
 const NUMBERS_INPUT = Array.from({ length: 9 }).map((_, i) => i + 1).map(v => String(v))
-type NumberValidation = {
+type CellValidation = {
   value: string,
   isUsed: boolean,
   isUsedInRow: boolean,
   isUsedInCol: boolean,
   isUsedInSquare: boolean
 }
-const VALIDATED_INPUT_TEMPLATE: NumberValidation[] = NUMBERS_INPUT.map(
+const CELL_VALIDATION_TEMPLATE: CellValidation[] = NUMBERS_INPUT.map(
   n => ({ value: n, isUsed: false, isUsedInRow: false, isUsedInCol: false, isUsedInSquare: false })
 )
 export const INPUT: string[] = [...NUMBERS_INPUT, X]
@@ -63,11 +63,13 @@ class Sudoku {
   userCol = $state(-1);
   isAnyCellActive = $derived.by(() => !this.checkIsCellActive(-1, -1));
 
-  validatedInput: NumberValidation[] = $state(VALIDATED_INPUT_TEMPLATE)
-  validatedInputNumbers: string[] = $derived(
-    this.validatedInput.filter((v) => v.isUsed).map((v) => v.value)
+  cellValidation: CellValidation[] = $state(CELL_VALIDATION_TEMPLATE)
+  cellValidatedNumbersSet: Set<string> = $derived.by(
+    () => {
+      const numbers = this.cellValidation.filter((v) => v.isUsed).map((v) => v.value)
+      return new Set(numbers)
+    }
   )
-  validatedInputNumbersSet = $derived(new Set(this.validatedInputNumbers))
 
   isWin = $state(false);
   isWinChecked = $state(false)
@@ -119,19 +121,11 @@ class Sudoku {
     }
   }
 
-  check = () => {
+  validateBoard = () => {
     this.isWinChecked = true;
     //const isCorrect = this.userBoard.toString() === this.initialBoardSolved.toString()
     //console.log(this.userBoard)
-    let isMek = this.userBoard.every((rowArr, row) => {
-      console.log('row', rowArr)
-      rowArr.some((cellValue, col) => {
-        console.log({ row, col, cellValue })
-        return false
-      }
-      )
-      return true
-    })
+    // TODO: modify validateInput() to support full board validation to enable positionless validation
     const isCorrect = false
 
     if (isCorrect) {
@@ -149,8 +143,7 @@ class Sudoku {
 
     // TODO: track start and end time of the game
     // disallow gameplay changing setting mid game
-    //this.validatedInput = this.settings.isValidateInput ? this.validateInput() : []
-    this.validatedInput = this.validateInput()
+    this.cellValidation = this.settings.isValidateInput ? this.validateCellNumbers(this.userRow, this.userCol) : []
   }
 
   deselectCell() {
@@ -198,15 +191,10 @@ class Sudoku {
     return this.checkIsCell(r, c, this.userBoard, this.initialBoardSolved);
   }
 
-  validateInput = (): NumberValidation[] => {
-    const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
-
-    const validatedInput = deepClone(VALIDATED_INPUT_TEMPLATE)
-    const row = this.userRow
-    const col = this.userCol
+  validateCellNumbers = (row: number, col: number): CellValidation[] => {
+    const validatedInput = deepClone(CELL_VALIDATION_TEMPLATE)
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
-    console.log({ row, col, blockCol, blockRow })
 
     for (let i = 0; i < 9; i++) {
       if (isNumber(this.userBoard[row][i])) {
@@ -292,3 +280,5 @@ function checkIsValueValid(board: Board, row: number, col: number, value: string
 
 // classic deep close coz some of my homies have old android potato phones
 const deepClone = <T>(arr: readonly T[]): T[] => JSON.parse(JSON.stringify(arr))
+const isNumber = (n: string) => (!isNaN(parseFloat(n)) && !isNaN(-n))
+
