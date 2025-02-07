@@ -30,7 +30,6 @@
         break;
     }
   };
-  $inspect(sudoku.cellValidation);
 </script>
 
 <svelte:window onkeydown={handleKeyboardInput} />
@@ -76,7 +75,7 @@
       {#each INPUT as key}
         <button
           class="game-key"
-          disabled={sudoku.cellValidatedNumbersSet.has(key)}
+          disabled={sudoku.cellValidationNumbersSet.has(key)}
           onclick={() => sudoku.setCellValue(key)}>
           {key}
         </button>

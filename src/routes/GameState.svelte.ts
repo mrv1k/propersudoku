@@ -9,9 +9,17 @@ type CellValidation = {
   isUsedInRow: boolean,
   isUsedInCol: boolean,
   isUsedInSquare: boolean
+  isUsedEverywhere: boolean
 }
-const CELL_VALIDATION_TEMPLATE: CellValidation[] = NUMBERS_INPUT.map(
-  n => ({ value: n, isUsed: false, isUsedInRow: false, isUsedInCol: false, isUsedInSquare: false })
+const NUMBERS_VALIDATION_TEMPLATE: CellValidation[] = NUMBERS_INPUT.map(
+  n => ({
+    value: n,
+    isUsed: false,
+    isUsedInRow: false,
+    isUsedInCol: false,
+    isUsedInSquare: false,
+    isUsedEverywhere: false
+  })
 )
 export const INPUT: string[] = [...NUMBERS_INPUT, X]
 
@@ -61,10 +69,11 @@ export function getSudoku(): Sudoku {
 class Sudoku {
   userRow = $state(-1);
   userCol = $state(-1);
+
   isAnyCellActive = $derived.by(() => !this.checkIsCellActive(-1, -1));
 
-  cellValidation: CellValidation[] = $state(CELL_VALIDATION_TEMPLATE)
-  cellValidatedNumbersSet: Set<string> = $derived.by(
+  cellValidation: CellValidation[] = $state(NUMBERS_VALIDATION_TEMPLATE)
+  cellValidationNumbersSet: Set<string> = $derived.by(
     () => {
       const numbers = this.cellValidation.filter((v) => v.isUsed).map((v) => v.value)
       return new Set(numbers)
@@ -89,12 +98,12 @@ class Sudoku {
 
     if (initialBoard) {
       this.initialBoard = initialBoard
-      //this.initialBoardSolved = solve(initialBoard)
+      this.initialBoardSolved = solve(initialBoard)
       this.userBoard = initialBoard
     } else {
-      // WIP
+      // TODO: enable proper board initialization without initial board
       this.initialBoard = devBoardStub
-      //this.initialBoardSolved = solve(devBoardStub)
+      this.initialBoardSolved = solve(devBoardStub)
       this.userBoard = devBoardStub
     }
   }
@@ -123,10 +132,14 @@ class Sudoku {
 
   validateBoard = () => {
     this.isWinChecked = true;
-    //const isCorrect = this.userBoard.toString() === this.initialBoardSolved.toString()
-    //console.log(this.userBoard)
-    // TODO: modify validateInput() to support full board validation to enable positionless validation
-    const isCorrect = false
+
+    const isCorrect = this.userBoard.every(
+      (rowArray, rowIndex): boolean => {
+        return rowArray.every((_, cellIndex): boolean => {
+          return this.validateCellValues(rowIndex, cellIndex)
+            .every(validation => validation.isUsedEverywhere)
+        })
+      })
 
     if (isCorrect) {
       this.deselectCell();
@@ -143,7 +156,8 @@ class Sudoku {
 
     // TODO: track start and end time of the game
     // disallow gameplay changing setting mid game
-    this.cellValidation = this.settings.isValidateInput ? this.validateCellNumbers(this.userRow, this.userCol) : []
+    this.settings.isValidateInput ?
+      this.validateCellValues(this.userRow, this.userCol) : []
   }
 
   deselectCell() {
@@ -158,7 +172,7 @@ class Sudoku {
 
     // prevent invalid keyboard input
     if (key !== X && this.settings.isValidateInput) {
-      if (!checkIsValueValid(this.userBoard, this.userRow, this.userCol, key)) {
+      if (!checkIsValueValid(this.userRow, this.userCol, this.userBoard, key)) {
         return
       }
     }
@@ -187,37 +201,45 @@ class Sudoku {
     return cellValue !== X && !this.checkIsCellUserInput(r, c)
   }
 
+  // FIXME: currently bound to the way DFS solves the board
   checkIsCellValid = (r: number, c: number) => {
     return this.checkIsCell(r, c, this.userBoard, this.initialBoardSolved);
   }
 
-  validateCellNumbers = (row: number, col: number): CellValidation[] => {
-    const validatedInput = deepClone(CELL_VALIDATION_TEMPLATE)
+  validateCellValues = (row: number, col: number): CellValidation[] => {
+    const numbersValidation = deepClone(NUMBERS_VALIDATION_TEMPLATE)
+
     const blockRow = Math.floor(row / 3) * 3;
     const blockCol = Math.floor(col / 3) * 3;
+    const board = this.userBoard
 
     for (let i = 0; i < 9; i++) {
-      if (isNumber(this.userBoard[row][i])) {
-        const rowIndex = Number(this.userBoard[row][i]) - 1
-        validatedInput[rowIndex].isUsedInRow = true
-        validatedInput[rowIndex].isUsed = true
+      if (isNumber(board[row][i])) {
+        const rowIndex = Number(board[row][i]) - 1
+        numbersValidation[rowIndex].isUsedInRow = true
+        numbersValidation[rowIndex].isUsed = true
       }
-      if (isNumber(this.userBoard[i][col])) {
-        const colIndex = Number(this.userBoard[i][col]) - 1
-        validatedInput[colIndex].isUsedInCol = true
-        validatedInput[colIndex].isUsed = true
+      if (isNumber(board[i][col])) {
+        const colIndex = Number(board[i][col]) - 1
+        numbersValidation[colIndex].isUsedInCol = true
+        numbersValidation[colIndex].isUsed = true
       }
 
       const curRow = blockRow + Math.floor(i / 3);
       const curCol = blockCol + Math.floor(i % 3);
-      if (isNumber(this.userBoard[curRow][curCol])) {
-        const squareIndex = Number(this.userBoard[curRow][curCol]) - 1
-        validatedInput[squareIndex].isUsedInSquare = true
-        validatedInput[squareIndex].isUsed = true
+      if (isNumber(board[curRow][curCol])) {
+        const squareIndex = Number(board[curRow][curCol]) - 1
+        numbersValidation[squareIndex].isUsedInSquare = true
+        numbersValidation[squareIndex].isUsed = true
       }
     }
 
-    return validatedInput
+    for (let i = 0; i < 9; i++) {
+      const c = numbersValidation[i]
+      c.isUsedEverywhere = c.isUsedInRow && c.isUsedInCol && c.isUsedInSquare
+    }
+
+    return numbersValidation
   }
 }
 
@@ -239,7 +261,7 @@ function solveSudokuMutatingDFS(board: Board): boolean {
       for (let i = 1; i <= 9; i++) {
         const c = i.toString();
         // if that number is valid
-        if (checkIsValueValid(board, row, col, c)) {
+        if (checkIsValueValid(row, col, board, c)) {
           board[row][col] = c;
           // continue search for that board, ret true if solution is reached
           if (solveSudokuMutatingDFS(board)) {
@@ -258,7 +280,7 @@ function solveSudokuMutatingDFS(board: Board): boolean {
   return true;
 }
 
-function checkIsValueValid(board: Board, row: number, col: number, value: string): boolean {
+function checkIsValueValid(row: number, col: number, board: Board, value: string): boolean {
   const blockRow = Math.floor(row / 3) * 3;
   const blockCol = Math.floor(col / 3) * 3;
   for (let i = 0; i < 9; i++) {

@@ -15,7 +15,7 @@
     </div>
     <div class="flex-none">
       <!-- TODO: start/restart should be one button -->
-      <button class="btn btn-ghost" onclick={sudoku.validate}>Validate</button>
+      <button class="btn btn-ghost" onclick={sudoku.validateBoard}>Validate</button>
       <!-- TODO: highlight solve button when the grid is full -->
       <button class="btn btn-ghost" onclick={sudoku.solve}>Solve</button>
       <button class="btn btn-ghost">Share</button>
