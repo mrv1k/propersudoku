@@ -30,6 +30,8 @@
         break;
     }
   };
+  $inspect(sudoku.cellValidation);
+  $inspect(sudoku.cellValidationNumbersSet);
 </script>
 
 <svelte:window onkeydown={handleKeyboardInput} />

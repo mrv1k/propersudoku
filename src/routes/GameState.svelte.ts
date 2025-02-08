@@ -75,7 +75,7 @@ class Sudoku {
   cellValidation: CellValidation[] = $state(NUMBERS_VALIDATION_TEMPLATE)
   cellValidationNumbersSet: Set<string> = $derived.by(
     () => {
-      const numbers = this.cellValidation.filter((v) => v.isUsed).map((v) => v.value)
+      const numbers = this.cellValidation.filter((number) => number.isUsed).map((v) => v.value)
       return new Set(numbers)
     }
   )
@@ -90,10 +90,12 @@ class Sudoku {
   userBoard: Board = $state(emptyBoard)
 
   startTime: number
-  endTime: number = 0
+  endTime: number | null = null
 
   constructor(settings: Settings, initialBoard?: Board) {
     this.settings = settings
+    // TODO: track start and end time of the game
+    // TODO: disallow gameplay changing setting mid game (such as validation)
     this.startTime = Date.now()
 
     if (initialBoard) {
@@ -120,6 +122,8 @@ class Sudoku {
     }
     this.isWin = false
     this.isWinChecked = false
+    this.startTime = Date.now()
+    this.endTime = null
   }
 
   //isUseHistory?: boolean -- todo add replayable history for solutions
@@ -143,6 +147,7 @@ class Sudoku {
 
     if (isCorrect) {
       this.deselectCell();
+      this.endTime = Date.now()
     }
     this.isWin = isCorrect;
   }
@@ -154,10 +159,9 @@ class Sudoku {
     this.userRow = rowIndex;
     this.userCol = colIndex;
 
-    // TODO: track start and end time of the game
-    // disallow gameplay changing setting mid game
-    this.settings.isValidateInput ?
-      this.validateCellNumbers(this.userRow, this.userCol) : []
+    this.cellValidation =
+      this.settings.isValidateInput ?
+        this.validateCellNumbers(this.userRow, this.userCol) : []
   }
 
   deselectCell() {
