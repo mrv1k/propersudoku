@@ -134,10 +134,10 @@ class Sudoku {
     this.isWinChecked = true;
 
     const isCorrect = this.userBoard.every(
-      (rowArray, rowIndex): boolean => {
-        return rowArray.every((_, cellIndex): boolean => {
-          return this.validateCellValues(rowIndex, cellIndex)
-            .every(validation => validation.isUsedEverywhere)
+      (rowArray, r): boolean => {
+        return rowArray.every((_, c): boolean => {
+          return this.validateCellNumbers(r, c)
+            .every(number => number.isUsedEverywhere)
         })
       })
 
@@ -157,7 +157,7 @@ class Sudoku {
     // TODO: track start and end time of the game
     // disallow gameplay changing setting mid game
     this.settings.isValidateInput ?
-      this.validateCellValues(this.userRow, this.userCol) : []
+      this.validateCellNumbers(this.userRow, this.userCol) : []
   }
 
   deselectCell() {
@@ -189,11 +189,11 @@ class Sudoku {
     return this.userRow === r && this.userCol === c;
   }
 
-  checkIsCell = (r: number, c: number, boardA: Board, boardB?: Board) => {
+  checkIsCell = (r: number, c: number, boardA: Board, boardB?: Board): boolean => {
     return boardB != null ? boardA[r][c] === boardB[r][c] : false
   }
 
-  checkIsCellUserInput = (r: number, c: number) => {
+  checkIsCellUserInput = (r: number, c: number): boolean => {
     return !this.checkIsCell(r, c, this.userBoard, this.initialBoard);
   }
 
@@ -201,12 +201,11 @@ class Sudoku {
     return cellValue !== X && !this.checkIsCellUserInput(r, c)
   }
 
-  // FIXME: currently bound to the way DFS solves the board
-  checkIsCellValid = (r: number, c: number) => {
-    return this.checkIsCell(r, c, this.userBoard, this.initialBoardSolved);
+  checkIsCellValid = (r: number, c: number): boolean => {
+    return this.validateCellNumbers(r, c).every(number => number.isUsedEverywhere)
   }
 
-  validateCellValues = (row: number, col: number): CellValidation[] => {
+  validateCellNumbers = (row: number, col: number): CellValidation[] => {
     const numbersValidation = deepClone(NUMBERS_VALIDATION_TEMPLATE)
 
     const blockRow = Math.floor(row / 3) * 3;
